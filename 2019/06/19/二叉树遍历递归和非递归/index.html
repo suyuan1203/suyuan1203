@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="二叉树遍历递归和非递归"/><link rel="alternate" href="/default" title="Hexo"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://www.suyuan.me/2019/06/19/二叉树遍历递归和非递归/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>二叉树遍历递归和非递归 - Hexo</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Hexo</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">Home
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Hexo</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            Home
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">二叉树遍历递归和非递归
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2019-06-19
+        </span></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#pre-order遍历的递归实现"><span class="toc-text">pre-order遍历的递归实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用stack模拟递归调用"><span class="toc-text">用stack模拟递归调用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#in-order遍历"><span class="toc-text">in-order遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#post-order遍历"><span class="toc-text">post-order遍历</span></a></li></ol>
+    </div>
+  </div><div class="post-content"><p>假如二叉树的定义为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">function Tree(val) &#123;</span><br><span class="line">  this.val &#x3D; val;</span><br><span class="line">  this.left &#x3D; this.right &#x3D; null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>二叉树遍历的递归实现方式非常简洁易懂，通过函数调用栈保存了遍历到的节点，当函数返回时，我们很容易知道从哪一个节点开始继续遍历。</p>
+<h2 id="pre-order遍历的递归实现"><a href="#pre-order遍历的递归实现" class="headerlink" title="pre-order遍历的递归实现"></a>pre-order遍历的递归实现</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function traverse(tree) &#123;</span><br><span class="line">  if (!tree) return;</span><br><span class="line">  console.log(tree.val);</span><br><span class="line">  if (tree.left) traverse(tree.left);</span><br><span class="line">  if (tree.right) traverse(tree.right);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用traverse(tree.left)会先保存当前函数的局部变量，参数，然后在函数调用栈中创建一个frame，新的frame记录了traverse(tree.left)返回时，下一步要执行的代码的地址，在这里应该是 if (tree.right) traverse(tree.right);</p>
+<h2 id="用stack模拟递归调用"><a href="#用stack模拟递归调用" class="headerlink" title="用stack模拟递归调用"></a>用stack模拟递归调用</h2><p>所有递归形式的程序都有等价的非递归的形式。把递归形式的程序转换为非递归的形式的思路是，用一个stack来模拟函数调用栈，每个递归调用相当于一个push操作，函数返回相当于pop操作。我们push到栈上的数据需要至少提供两种信息，执行push操作时的上下文和执行pop以后要执行的代码。</p>
+<p>对于pre-order遍历来说，push到栈上的数据需要至少提供两个信息，一是push到栈的节点的父节点，二是push到栈的节点是左节点还是右节点，当然更完善的模拟应该把所有局部变量、参数都保存在堆栈中。有了这两个信息，我们就可以在pop以后，区别开这个pop模拟的是一次traverse(tree.left)返回了，还是traverse(tree.right)返回了。之所以要知道这一点，一是为了决定是否打印节点，二是为了判断下一个遍历的节点是哪一个。如果是traverse(tree.right)返回了，那么程序就结束了；如果是traverse(tree.left)结束了，那么还要继续遍历右节点。</p>
+<p>pre-order非递归实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">function traverse(tree) &#123;</span><br><span class="line">  if (!tree) return;</span><br><span class="line">  let stack &#x3D; [&#123;</span><br><span class="line">    tree: tree,</span><br><span class="line">    parent: null, &#x2F;&#x2F; 父节点，通过父节点可以拿到右节点</span><br><span class="line">    isLeft: true &#x2F;&#x2F; 是左节点，还是右节点</span><br><span class="line">  &#125;];</span><br><span class="line">  while (stack.length &gt; 0) &#123;</span><br><span class="line">    let node &#x3D; stack[stack.length-1];</span><br><span class="line">    console.log(node.tree.val); &#x2F;&#x2F; pre-order遍历先打印父节点</span><br><span class="line"></span><br><span class="line">    if (node.tree.left) &#123;</span><br><span class="line">		  &#x2F;&#x2F; pre-order先遍历左节点，push相当于一次递归调用traverse(tree.left);</span><br><span class="line">      stack.push(&#123;</span><br><span class="line">        tree: node.tree.left,</span><br><span class="line">        parent: node.tree,</span><br><span class="line">        isLeft: true</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125; else if (node.tree.right) &#123;</span><br><span class="line">		  &#x2F;&#x2F; 如果最左边的节点没有左节点了，那么遍历右节点，相当于调用traverse(tree.right);</span><br><span class="line">      stack.push(&#123;</span><br><span class="line">        tree: node.tree.right,</span><br><span class="line">        parent: node.tree,</span><br><span class="line">        isLeft: false</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">		  &#x2F;&#x2F; 到达叶子节点，相当于递归版本中if (!tree) return;</span><br><span class="line">			&#x2F;&#x2F; 开始pop，模拟函数返回</span><br><span class="line">			&#x2F;&#x2F; 这里就用到了保存在堆栈上的parent和isLeft信息</span><br><span class="line">			&#x2F;&#x2F; 利用这两个信息可以判断当前的pop是否相当于traverse(tree.left)返回</span><br><span class="line">			&#x2F;&#x2F; 如果是，那么需要遍历右节点，否则继续pop(相当于返回到上层函数)</span><br><span class="line">      while (stack.length &gt; 0)&#123;</span><br><span class="line">        let top &#x3D; stack.pop();</span><br><span class="line">        if (top.isLeft &amp;&amp; top.parent &amp;&amp; top.parent.right) &#123;</span><br><span class="line">          stack.push(&#123;</span><br><span class="line">            tree: top.parent.right,</span><br><span class="line">            parent: top.parent,</span><br><span class="line">            isLeft: false</span><br><span class="line">          &#125;);</span><br><span class="line">          break;</span><br><span class="line">        &#125; </span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们使用堆栈模拟了函数递归调用过程，基本的流程是，一开始连续地入栈，模拟函数调用，然后出栈，判断是否要遍历右节点，然后重复这个过程。这段代码还是比较复杂的，不怎么直观，下面的代码更简洁。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">function traverse(tree) &#123;</span><br><span class="line">  if (!tree) return;</span><br><span class="line">  let stack &#x3D; [tree];</span><br><span class="line">  while (stack.length &gt; 0) &#123;</span><br><span class="line">    let node &#x3D; stack.pop();</span><br><span class="line">    console.log(node.val);</span><br><span class="line">    if (node.right) stack.push(node.right);</span><br><span class="line">    if (node.left) stack.push(node.left);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为什么代码可以精简成这样呢?主要是两点，因为是pro-order遍历，先打印父节点，这样在后面的程序中没必要保留对父节点的引用。二是左子树遍历完，下一个节点就是右节点，我们不必等到遍历左子树完成就可以把右节点先放到堆栈中。同样对于遍历左子树，当打印完左子树根节点，就没必要保留对根节点的引用了。因此上面这段程序从堆栈中pop一个节点，就马上打印。而模拟堆栈版本的程序，堆栈中一直保留着从根节点到叶子节点的引用，直到从叶子节点开始pop，因为这样才完整模拟了函数调用。</p>
+<p>对比上面的两段非递归pre-order遍历代码，我们发现模拟函数调用写出的代码其实会比较复杂，还需要经过优化才更容易理解。</p>
+<h2 id="in-order遍历"><a href="#in-order遍历" class="headerlink" title="in-order遍历"></a>in-order遍历</h2><p>递归实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function traverse(tree) &#123;</span><br><span class="line">  if (!tree) return;</span><br><span class="line">  if (tree.left) traverse(tree.left);</span><br><span class="line">  console.log(tree.val);</span><br><span class="line">  if (tree.right) traverse(tree.right);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>非递归实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">function traverse(tree) &#123;</span><br><span class="line">  if (!tree) return;</span><br><span class="line">  let stack &#x3D; [tree];</span><br><span class="line">  while (stack.length &gt; 0) &#123;</span><br><span class="line">    let top &#x3D; stack[stack.length-1];</span><br><span class="line">    if (top.left) &#123;</span><br><span class="line">      stack.push(top.left);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      while (stack.length &gt; 0) &#123;</span><br><span class="line">        top &#x3D; stack.pop();</span><br><span class="line">        console.log(top.val);</span><br><span class="line">        if (top.right) &#123;</span><br><span class="line">          stack.push(top.right);</span><br><span class="line">          break;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="post-order遍历"><a href="#post-order遍历" class="headerlink" title="post-order遍历"></a>post-order遍历</h2><p>递归实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function traverse(tree) &#123;</span><br><span class="line">  if (!tree) return;</span><br><span class="line">  if (tree.left) traverse(tree.left);</span><br><span class="line">  if (tree.right) traverse(tree.right);</span><br><span class="line">  console.log(tree.val);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>非递归实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">function traverse(tree) &#123;</span><br><span class="line">  if (!tree) return;</span><br><span class="line">  let stack &#x3D; [tree];</span><br><span class="line">  let revStack &#x3D; [];</span><br><span class="line">  while (stack.length &gt; 0) &#123;</span><br><span class="line">    let top &#x3D; stack.pop();</span><br><span class="line">    revStack.push(top);</span><br><span class="line">    if (top.left) stack.push(top.left);</span><br><span class="line">    if (top.right) stack.push(top.right);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  while (revStack.length &gt; 0) &#123;</span><br><span class="line">    let top &#x3D; revStack.pop();</span><br><span class="line">    console.log(top.val);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>post-order的非递归遍历比较有意思。我们观察到post-order的遍历顺序是，左-右-中，而如果pre-order遍历的时候先右后左遍历，那么遍历顺序是中-右-左，刚好和post-order的顺序相反，我们把这种遍历顺序叫reverse-pre-order。因此如果想得到post-order的遍历，那么可以按照reverse-pre-order遍历，然后把遍历到的节点依次放到另外一个堆栈中，最后把这个堆栈中的内容输出，就是post-order的遍历。</p>
+<p><img src="https://wx1.sinaimg.cn/mw690/66ae68a1ly1g46rqujxb5j20a905m0st.jpg" alt=""></p>
+<p>上图post-order的顺序是2, 3, 1, 5, 7, 6, 4，而reverse-pre-order的顺序刚好是4，6，7，5，1，3，2。</p>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="https://www.suyuan.me">John Doe</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="https://www.suyuan.me/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/">https://www.suyuan.me/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/2019/06/20/Node-js-mysqljs-mysql-package/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">Node.js mysqljs/mysql package</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    <a class="next" href="/2019/06/18/Go-Module-in-2019/">
+        <span class="next-text nav-default">Go Module in 2019</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+        <a href="https://github.com/ahonn" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">John Doe</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

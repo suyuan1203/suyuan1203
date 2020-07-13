@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="Go Module in 2019"/><link rel="alternate" href="/default" title="Hexo"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://www.suyuan.me/2019/06/18/Go-Module-in-2019/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>Go Module in 2019 - Hexo</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Hexo</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">Home
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Hexo</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            Home
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Go Module in 2019
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2019-06-18
+        </span></div>
+    </header>
+
+    <div class="post-content"><p>2018年发布的Go 1.11包含了Go modules</p>
+<p>如果go命令在GOPATH/src以外的目录运行，并且这个目录有一个go.mod文件，那么go是在module模式下运行。</p>
+<p>目前可以通过$GO111MODULE环境变量来控制是否使用go module mode。这个环境变量，默认值是auto。</p>
+<p>计划在2019年8月，发布Go 1.13，这个版本中$GO111MODULE会被默认设置为on。</p>
+<p>目前有大量的工具、源码默认认为go的module放在GOPATH，所以如果迁移到go module mode的话，有大量的工具、源码要修改。</p>
+<p>为了简化迁移的工作，golang团队提供了一个package，golang.org/x/tools/go/packages，这个package抽象了寻找和加载go source code的操作，所以新的代码可以使用这个package。</p>
+<p>go的module是分散在不同的host上的，任何人都建立自己的host。这样的好处是，项目中引用private package很容易，但是这也带来一个问题，就是很难找到所有的module，或者在所有的module中查找一个module。</p>
+<p>go新的module系统提供了一个go module index服务，利用这个服务，用户可以更容易发现新的module，更容易查找一个module。</p>
+<p>go module index服务还会给每一个module提供一个go.sum文件，这个文件会列出一个module依赖的所有其他module的hash，这样go就可以利用go.sum来确保获得的其他module没有被修改过。</p>
+<p>Node.js社区可以在考虑建立一个分布式的module registry，<a href="https://github.com/entropic-dev/entropic" target="_blank" rel="noopener">https://github.com/entropic-dev/entropic</a></p>
+<p>参考</p>
+<ul>
+<li><a href="https://blog.golang.org/modules2019" target="_blank" rel="noopener">https://blog.golang.org/modules2019</a></li>
+</ul>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="https://www.suyuan.me">John Doe</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="https://www.suyuan.me/2019/06/18/Go-Module-in-2019/">https://www.suyuan.me/2019/06/18/Go-Module-in-2019/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">二叉树遍历递归和非递归</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    <a class="next" href="/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/">
+        <span class="next-text nav-default">Node.js简单Promise实现</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+        <a href="https://github.com/ahonn" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">John Doe</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

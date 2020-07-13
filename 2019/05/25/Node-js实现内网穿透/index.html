@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="Node.js实现内网穿透"/><link rel="alternate" href="/default" title="Hexo"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://www.suyuan.me/2019/05/25/Node-js实现内网穿透/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>Node.js实现内网穿透 - Hexo</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Hexo</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">Home
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Hexo</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            Home
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Node.js实现内网穿透
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2019-05-25
+        </span></div>
+    </header>
+
+    <div class="post-content"><p>如何在办公室外调用办公室内一台服务器上部署的服务？</p>
+<p>如果办公室有固定的IP地址，而且可以映射到内网的机器，那么这个问题很简单。如果无法通过这种方式访问内网的机器，我们还可以通过内网穿透的办法来解决。</p>
+<p>基本的思路是，需要有一台公网的服务器，服务器上运行一个程序，这个程序监听两个端口，分别供外部客户端和内网客户端连接，然后这个程序负责转发双方的通信给对方。</p>
+<p><img src="https://wx3.sinaimg.cn/mw690/66ae68a1ly1g3cj95381qj20oc0gsjsj.jpg" alt=""></p>
+<p>server.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net &#x3D; require(&#39;net&#39;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket;</span><br><span class="line">const inServer &#x3D; net.createServer(function(socket) &#123;</span><br><span class="line">  inSocket &#x3D; socket;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer &#x3D; net.createServer(function(socket) &#123;</span><br><span class="line">  outSocket &#x3D; socket;</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
+
+<p>in_client.js 内网的客户端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">const net &#x3D; require(&#39;net&#39;);</span><br><span class="line"></span><br><span class="line">const socket &#x3D; net.connect(&#123; port: 4001 &#125;, () &#x3D;&gt; &#123;</span><br><span class="line">  </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#39;data&#39;, (data) &#x3D;&gt; &#123;</span><br><span class="line">  console.log(data.toString());</span><br><span class="line">  socket.write(&#39;Data from in office&#39;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#39;end&#39;, () &#x3D;&gt; &#123;</span><br><span class="line">  console.log(&#39;on end&#39;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>out_client.js 外网的客户端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">const net &#x3D; require(&#39;net&#39;);</span><br><span class="line"></span><br><span class="line">const socket &#x3D; net.connect(&#123; port: 4002 &#125;, () &#x3D;&gt; &#123;</span><br><span class="line">  socket.write(&#39;Data from outside&#39;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#39;data&#39;, (data) &#x3D;&gt; &#123;</span><br><span class="line">  console.log(data.toString());</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#39;end&#39;, () &#x3D;&gt; &#123;</span><br><span class="line">  console.log(&#39;on end&#39;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>先运行server.js，然后运行in_client.js，再运行out_client.js</p>
+<p>然后我们可以看到in_client.js和out_client.js互相可以通过server.js通信</p>
+<p>这里in_client.js需要先运行，然后再运行out_client.js。类似于我们需要先在内网机器上运行teamviewer，然后再在外部运行teamviewer。</p>
+<p>然后我们就可以扩展in_client和out_client的功能，例如当out_client发送特定的命令时，in_client就传输本地的屏幕和键盘事件给对方，这样就能实现类似teamviewer的远程桌面。</p>
+<p>回到我们开始的问题，如果内网机器上部署了一个service，如何通过out_client访问到呢？</p>
+<p>我们可以在in_client启动时就连接要请求的服务，然后等待外部的访问</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">const net &#x3D; require(&#39;net&#39;);</span><br><span class="line"></span><br><span class="line">let serviceSocket, socket;</span><br><span class="line"></span><br><span class="line">socket &#x3D; net.connect(&#123; port: 4001 &#125;); &#x2F;&#x2F; 连接公网服务器</span><br><span class="line"></span><br><span class="line">serviceSocket &#x3D; net.connect(&#123; port: 8080 &#125;); &#x2F;&#x2F; 假设在http:&#x2F;&#x2F;localhost:8080有一个服务</span><br><span class="line"></span><br><span class="line">socket.pipe(serviceSocket);  &#x2F;&#x2F; 从服务器转发过来的数据都会发送给service</span><br><span class="line">serviceSocket.pipe(socket); &#x2F;&#x2F; service返回的数据都会转发给socket，进而转发到服务器</span><br></pre></td></tr></table></figure>
+
+<p>server.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net &#x3D; require(&#39;net&#39;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket;</span><br><span class="line">const inServer &#x3D; net.createServer(function(socket) &#123;</span><br><span class="line">  inSocket &#x3D; socket;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer &#x3D; net.createServer(function(socket) &#123;</span><br><span class="line">  outSocket &#x3D; socket;</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
+
+<p>这时我们访问<a href="http://localhost:4002，我们的请求就会被转发到http://localhost:8080">http://localhost:4002，我们的请求就会被转发到http://localhost:8080</a></p>
+<p>仍然有一个问题是，http请求完成以后，客户端过一段时间以后会把底层的TCP连接关掉，那么我们在server上建立的，inSocket和outSocket之间的pipe就断掉了。</p>
+<p>解决这个问题的思路是，在server上再添加一个listen的socket，这个socket专门用来和in_client通信，告诉in_client有新的连接请求，in_client发现有新的连接请求以后，再和server建立一个用于转发tcp的连接，这个连接可以在通信完就关闭掉。</p>
+<p>我们通过这个新建立的socket发送控制命令给in_client，告诉它有新的连接了，所以我们把这个socket叫controlSocket</p>
+<p>server.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">const net &#x3D; require(&#39;net&#39;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket, controlSocket;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 这里我们添加了controlServer</span><br><span class="line">const controlServer &#x3D; net.createServer();</span><br><span class="line">controlServer.on(&#39;connection&#39;, (socket) &#x3D;&gt; &#123;</span><br><span class="line">  controlSocket &#x3D; socket;</span><br><span class="line">&#125;);</span><br><span class="line">controlServer.listen(4003);</span><br><span class="line"></span><br><span class="line">const inServer &#x3D; net.createServer();</span><br><span class="line">inServer.on(&#39;connection&#39;, function(socket) &#123;</span><br><span class="line">  inSocket &#x3D; socket;</span><br><span class="line">  &#x2F;&#x2F; 这里我们先建立了外部的socket，然后才通过控制socket</span><br><span class="line">  &#x2F;&#x2F; 告诉in_client建立内部的socket，所以把pipe的代码放在这里</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer &#x3D; net.createServer();</span><br><span class="line">outServer.on(&#39;connection&#39;, function(socket) &#123;</span><br><span class="line">  outSocket &#x3D; socket;</span><br><span class="line">  controlSocket.write(&#39;new_conn_cmd&#39;);</span><br><span class="line">&#125;);</span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
+
+<p>in_client.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net &#x3D; require(&#39;net&#39;);</span><br><span class="line"></span><br><span class="line">let serviceSocket, outSocket, controlSocket;</span><br><span class="line"></span><br><span class="line">controlSocket &#x3D; net.connect(&#123; port: 4003 &#125;);</span><br><span class="line"></span><br><span class="line">controlSocket.on(&#39;data&#39;, (data) &#x3D;&gt; &#123;</span><br><span class="line">  &#x2F;&#x2F; 这里没有处理命令的长度</span><br><span class="line">  data &#x3D; data.toString();</span><br><span class="line">  if (data &#x3D;&#x3D;&#x3D; &#39;new_conn_cmd&#39;) &#123;</span><br><span class="line">    outSocket &#x3D; net.connect(&#123; port: 4001 &#125;);</span><br><span class="line">    serviceSocket &#x3D; net.connect(&#123; port: 8080 &#125;);</span><br><span class="line">    outSocket.pipe(serviceSocket);</span><br><span class="line">    serviceSocket.pipe(outSocket);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    console.log(&#39;Invalid commadn&#39;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这时我们再请求<a href="http://127.0.0.1:4002/，等一段时间，连接会被断掉，下一次请求的时候会建立新的连接。因为http协议会复用底层的连接，短时间内连续的请求不会建立新的连接" target="_blank" rel="noopener">http://127.0.0.1:4002/，等一段时间，连接会被断掉，下一次请求的时候会建立新的连接。因为http协议会复用底层的连接，短时间内连续的请求不会建立新的连接</a> 。</p>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="https://www.suyuan.me">John Doe</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="https://www.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">https://www.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">Redis信号量</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    <a class="next" href="/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/">
+        <span class="next-text nav-default">统计语言模型和隐马尔科夫模型</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+        <a href="https://github.com/ahonn" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">John Doe</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

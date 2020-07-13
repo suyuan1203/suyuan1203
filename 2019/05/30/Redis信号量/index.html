@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="Redis信号量"/><link rel="alternate" href="/default" title="Hexo"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://www.suyuan.me/2019/05/30/Redis信号量/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>Redis信号量 - Hexo</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Hexo</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">Home
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Hexo</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            Home
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Redis信号量
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2019-05-30
+        </span></div>
+    </header>
+
+    <div class="post-content"><p>信号量可以只使用一个数字来实现，但是这样的信号量没有timeout，如果获得信号量的client出错退出了，那么这个信号量就得不到释放，我们可以利用zset来实现一个支持timeout的信号量。</p>
+<p>思路是每次获取信号量的时候，生成一个id，然后把id添加到zset中，value设置为当前的时戳。然后检查id在zset中的rank，如果超过信号量数量limit，那么获取信号量失败，否则获取信号量成功，返回id。</p>
+<p>client.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">async function acquireSemaphore(name, limit &#x3D; 5, timeout &#x3D; 10000) &#123;</span><br><span class="line">  const id &#x3D; uuidv4(); &#x2F;&#x2F; 生成一个id</span><br><span class="line">  const now &#x3D; new Date().getTime(); &#x2F;&#x2F; 当前的时戳</span><br><span class="line"></span><br><span class="line">  const pipeline &#x3D; redis.pipeline();</span><br><span class="line">  await pipeline.zremrangebyscore(name, &#39;-inf&#39;, now - timeout); &#x2F;&#x2F; 删除已经超时的信号量</span><br><span class="line">  await pipeline.zadd(name, now, id); </span><br><span class="line">  await pipeline.zrank(name, id);</span><br><span class="line">  const results &#x3D; await pipeline.exec();</span><br><span class="line">  &#x2F;&#x2F; 如果新添加的数据的rank没有超过limit，那么获取信号量成功</span><br><span class="line">  if (results[results.length - 1][1] &lt; limit) &#123;</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line">  redis.zrem(name, id); &#x2F;&#x2F; 如果获取信号量失败，那么把id从zset中删除</span><br><span class="line">  return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码依赖于多个client的时间是同步的，假设有两个client A和B，B的时间落后A 10ms。A和B都尝试获取最后一个信号量，A先获取成功。A在zset中添加了最后一项。<br>zset</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5ff  1559220791205</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f1  1559220791206</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f2  1559220791207</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f3  1559220791208</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791249</span><br></pre></td></tr></table></figure>
+
+<p>接着B尝试获取信号量，因为B的时间比A落后，B写入的值是1559220791239，落后A 10ms。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791239</span><br></pre></td></tr></table></figure>
+
+<p>zset会根据value排序，结果是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5ff  1559220791205</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f1  1559220791206</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f2  1559220791207</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f3  1559220791208</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791239</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791249</span><br></pre></td></tr></table></figure>
+
+<p>这样相当于B插入在了A的前面。这样B在zset中的rank是4，没有超过信号量的限制。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">await pipeline.zrank(name, id);</span><br></pre></td></tr></table></figure>
+
+<p>这样A和B同时获得了信号量，超过了信号量的限制，这不是我们想要的结果。</p>
+<p>如果在zset中保存时戳，会有不同机器的时间不同步的问题。如果在zset中存储一个递增的id，这样不同的client在zset中的排序就不会受机器时戳的影响了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">async function acquireSemaphore(name, limit &#x3D; 5, timeout &#x3D; 10000) &#123;</span><br><span class="line">  const id &#x3D; uuidv4();</span><br><span class="line">  const now &#x3D; new Date().getTime();</span><br><span class="line">  const timeKey &#x3D; name + &#39;:time&#39;;</span><br><span class="line">  const countKey &#x3D; name + &#39;:count&#39;; &#x2F;&#x2F; 这里增加了一个递增的id</span><br><span class="line"></span><br><span class="line">  let pipeline &#x3D; redis.pipeline();</span><br><span class="line">  await pipeline.zremrangebyscore(timeKey, &#39;-inf&#39;, now - timeout);</span><br><span class="line">  await pipeline.zinterstore(</span><br><span class="line">    countKey, </span><br><span class="line">    2, </span><br><span class="line">    countKey,</span><br><span class="line">    timeKey, </span><br><span class="line">    &#39;weights&#39;,</span><br><span class="line">    1,</span><br><span class="line">    0</span><br><span class="line">  ); &#x2F;&#x2F; 求timeKey和countKey的交集，过滤掉timeout的信号量</span><br><span class="line"></span><br><span class="line">  await pipeline.incr(&#39;semaphore:count&#39;);</span><br><span class="line">  let results &#x3D; await pipeline.exec();</span><br><span class="line">  const count &#x3D; results[results.length-1][1];</span><br><span class="line"></span><br><span class="line">  pipeline &#x3D; redis.pipeline();</span><br><span class="line">  await pipeline.zadd(timeKey, now, id);</span><br><span class="line">  await pipeline.zadd(countKey, count, id);</span><br><span class="line">  await pipeline.zrank(countKey, id); &#x2F;&#x2F; 后获取信号量的client的rank更高</span><br><span class="line"></span><br><span class="line">  let results2 &#x3D; await pipeline.exec();</span><br><span class="line">  if (results2[results2.length - 1][1] &lt; limit) &#123;</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  redis.zrem(timeKey, id);</span><br><span class="line">  redis.zrem(countKey, id);</span><br><span class="line">  return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="https://www.suyuan.me">John Doe</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="https://www.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/">https://www.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">70岁后工作</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    <a class="next" href="/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">
+        <span class="next-text nav-default">Node.js实现内网穿透</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+        <a href="https://github.com/ahonn" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">John Doe</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>
