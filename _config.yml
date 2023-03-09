@@ -101,4 +101,4 @@ deploy:
   type: 'git'
   repo: git@github.com:suyuan1203/suyuan1203.git
   branch: master
-  message: 更新
+  message: update
