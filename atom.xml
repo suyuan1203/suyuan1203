@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Su Yuan</title>
+  
+  
+  <link href="https://blog.suyuan.me/atom.xml" rel="self"/>
+  
+  <link href="https://blog.suyuan.me/"/>
+  <updated>2023-04-29T04:37:57.501Z</updated>
+  <id>https://blog.suyuan.me/</id>
+  
+  <author>
+    <name>Su Yuan</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>linux namespace</title>
+    <link href="https://blog.suyuan.me/2023/03/09/linux-namespace/"/>
+    <id>https://blog.suyuan.me/2023/03/09/linux-namespace/</id>
+    <published>2023-03-09T23:17:58.000Z</published>
+    <updated>2023-04-29T04:37:57.501Z</updated>
+    
+    <content type="html"><![CDATA[<p>What is linux namespaces?</p><p>Linux namespaces is a feature which let processes under certain namespace can only view or manage the resources belonging to the namespace. Those resources include process tree, network interface, mount points, etc.</p><p>Linux namespaces list:</p><ul><li>Cgroup</li><li>IPC</li><li>Network</li><li>Mount</li><li>PID</li><li>Time</li><li>User</li><li>UTS</li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;What is linux namespaces?&lt;/p&gt;
+&lt;p&gt;Linux namespaces is a feature which let processes under certain namespace can only view or manage the re</summary>
+      
+    
+    
+    
+    
+  </entry>
+  
+</feed>
