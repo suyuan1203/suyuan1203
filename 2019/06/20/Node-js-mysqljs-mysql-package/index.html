@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Node.js mysqljs/mysql package | Su Yuan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="https:&#x2F;&#x2F;github.com&#x2F;mysqljs&#x2F;mysql是一个用Node.js写的mysql驱动，代码简洁，明白。 一个mysql驱动要完成的功能是，建立到mysql服务器的tcp连接，然后按照mysql的protocol把数据发送给服务器，服务器收到数据以后，解析出要执行的命令和sql，执行sql，把结果按照protocol写回到客户端。 mysqljs&#x2F;mysql的对象主要有  Con">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node.js mysqljs&#x2F;mysql package">
+<meta property="og:url" content="https://blog.suyuan.me/2019/06/20/Node-js-mysqljs-mysql-package/index.html">
+<meta property="og:site_name" content="Su Yuan">
+<meta property="og:description" content="https:&#x2F;&#x2F;github.com&#x2F;mysqljs&#x2F;mysql是一个用Node.js写的mysql驱动，代码简洁，明白。 一个mysql驱动要完成的功能是，建立到mysql服务器的tcp连接，然后按照mysql的protocol把数据发送给服务器，服务器收到数据以后，解析出要执行的命令和sql，执行sql，把结果按照protocol写回到客户端。 mysqljs&#x2F;mysql的对象主要有  Con">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-06-20T15:19:48.000Z">
+<meta property="article:modified_time" content="2023-07-31T05:43:38.992Z">
+<meta property="article:author" content="Su Yuan">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Su Yuan" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Su Yuan</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://blog.suyuan.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Node-js-mysqljs-mysql-package" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/06/20/Node-js-mysqljs-mysql-package/" class="article-date">
+  <time datetime="2019-06-20T15:19:48.000Z" itemprop="datePublished">2019-06-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Node.js mysqljs/mysql package
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><a target="_blank" rel="noopener" href="https://github.com/mysqljs/mysql%E6%98%AF%E4%B8%80%E4%B8%AA%E7%94%A8Node.js%E5%86%99%E7%9A%84mysql%E9%A9%B1%E5%8A%A8%EF%BC%8C%E4%BB%A3%E7%A0%81%E7%AE%80%E6%B4%81%EF%BC%8C%E6%98%8E%E7%99%BD%E3%80%82">https://github.com/mysqljs/mysql是一个用Node.js写的mysql驱动，代码简洁，明白。</a></p>
+<p>一个mysql驱动要完成的功能是，建立到mysql服务器的tcp连接，然后按照mysql的protocol把数据发送给服务器，服务器收到数据以后，解析出要执行的命令和sql，执行sql，把结果按照protocol写回到客户端。</p>
+<p>mysqljs/mysql的对象主要有</p>
+<ul>
+<li>Connection 管理到服务器的连接</li>
+<li>Protocol 处理发送到服务器的数据和服务器返回的数据</li>
+<li>Sequence/Query 代表一个query</li>
+<li>ComQueryPacket和其他Packet  代表一个发送给服务器的消息</li>
+<li>PacketWriter 把Packet转换为buffer交给Protocol</li>
+<li>Parser 解析Protocol从服务器获得的buffer</li>
+</ul>
+<h2 id="建立连接"><a href="#建立连接" class="headerlink" title="建立连接"></a>建立连接</h2><p>建立连接的代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var mysql = require(&#x27;mysql&#x27;);</span><br><span class="line">var connection = mysql.createConnection(&#123;&#125;);</span><br><span class="line">connection.connect();</span><br></pre></td></tr></table></figure>
+
+<p>lib/Connection.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">function Connection(options) &#123;</span><br><span class="line">    Events.EventEmitter.call(this); // Connection是一个EventEmmiter</span><br><span class="line">    this._socket = options.socket;</span><br><span class="line">    this._protocol = new Protocol(&#123;config: this.config, connection: this&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Connection对象的_socket是一个到mysql的tcp链接，代码在<br>lib/Connection.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Connection.prototype.connect = function connect(options, callback) &#123;</span><br><span class="line">    this._socket = (this.config.socketPath)</span><br><span class="line">      ? Net.createConnection(this.config.socketPath)</span><br><span class="line">      : Net.createConnection(this.config.port, this.config.host);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的this._protocol是一个Protocol对象，Protocol对象是一个stream</p>
+<p>lib/protocol/Protocol.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Util.inherits(Protocol, Stream);</span><br><span class="line">function Protocol(options) &#123;</span><br><span class="line">    Stream.call(this);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="执行query"><a href="#执行query" class="headerlink" title="执行query"></a>执行query</h2><p>connection.query(‘select * from users’)实际创建了一个query，然后调用Protocol._enqueue</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Connection.prototype.query = function query(sql, values, cb) &#123;</span><br><span class="line">    var query = Connection.createQuery(sql, values, cb);</span><br><span class="line">    return this._protocol._enqueue(query);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Connection.createQuery返回了一个Query对象，Query对象继承自Sequence对象<br>lib/protocol/sequences/Query.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Util.inherits(Query, Sequence);</span><br><span class="line">function Query(options, callback) &#123;</span><br><span class="line">    Sequence.call(this, options, callback);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Sequence是一个EventEmmiter<br>lib/protocol/sequences/Sequence.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Util.inherits(Sequence, EventEmitter);</span><br><span class="line">function Sequence(options, callback) &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Connection.createQuery创建的query被添加到Protocol对象的一个内部queue中，然后调用query.start</p>
+<p>lib/protocol/Protocol.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Protocol.prototype._enqueue = function(sequence) &#123;</span><br><span class="line">    if (this._queue.length === 1) &#123;</span><br><span class="line">        this._parser.resetPacketNumber();</span><br><span class="line">        this._startSequence(sequence);</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Protocol有一个enqueue事件，在有新的query被enqueue时会触发</p>
+<p>lib/protocol/Protocol.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Protocol.prototype._enqueue = function(sequence) &#123;</span><br><span class="line">    this.emit(&#x27;enqueue&#x27;, sequence);</span><br><span class="line">&#125;   </span><br></pre></td></tr></table></figure>
+
+<p>在建立的连接的时候，Connection对象会给这个事件添加监听函数</p>
+<p>lib/Connection.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Connection.prototype.connect = function connect(options, callback) &#123;</span><br><span class="line">    this._protocol.on(&#x27;enqueue&#x27;, this._handleProtocolEnqueue.bind(this));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>this._handleProtocolEnqueue函数仅仅是把这个事件在Connection对象上再emit一次，这样就能允许Connection对象的调用者监听Connection的enqueue事件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Connection.prototype._handleProtocolEnqueue = function _handleProtocolEnqueue(sequence) &#123;</span><br><span class="line">  this.emit(&#x27;enqueue&#x27;, sequence);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在Protocol._enqueue方法中，监听了Query对象(Sequence对象)的很多事件</p>
+<p>lib/protocol/Protocol.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Protocol.prototype._enqueue = function(sequence) &#123;</span><br><span class="line">    sequence</span><br><span class="line">    .on(&#x27;error&#x27;, function(err) &#123;</span><br><span class="line">      self._delegateError(err, sequence);</span><br><span class="line">    &#125;)</span><br><span class="line">    .on(&#x27;packet&#x27;, function(packet) &#123;</span><br><span class="line">      sequence._timer.active();</span><br><span class="line">      self._emitPacket(packet);</span><br><span class="line">    &#125;)</span><br><span class="line">    .on(&#x27;timeout&#x27;, function() &#123;</span><br><span class="line">      var err = new Error(sequence.constructor.name + &#x27; inactivity timeout&#x27;);</span><br><span class="line"></span><br><span class="line">      err.code    = &#x27;PROTOCOL_SEQUENCE_TIMEOUT&#x27;;</span><br><span class="line">      err.fatal   = true;</span><br><span class="line">      err.timeout = sequence._timeout;</span><br><span class="line"></span><br><span class="line">      self._delegateError(err, sequence);</span><br><span class="line">    &#125;);</span><br><span class="line">    sequence.on(&#x27;end&#x27;, function () &#123;</span><br><span class="line">      self._dequeue(sequence);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Protocol在_enqueue方法中调用了Protocol.prototype._startSequence，Protocol.prototype._startSequence的定义</p>
+<p>lib/protocol/Protocol.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Protocol.prototype._startSequence = function(sequence) &#123;</span><br><span class="line">  if (sequence._timeout &gt; 0 &amp;&amp; isFinite(sequence._timeout)) &#123;</span><br><span class="line">    sequence._timer.start(sequence._timeout);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  if (sequence.constructor === Sequences.ChangeUser) &#123;</span><br><span class="line">    sequence.start(this._handshakeInitializationPacket);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    sequence.start();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Sequeuce.start一般由子类实现，所以可以看Query.start</p>
+<h2 id="query按照protocol转换为buffer"><a href="#query按照protocol转换为buffer" class="headerlink" title="query按照protocol转换为buffer"></a>query按照protocol转换为buffer</h2><p>lib/protocol/sequences/Query.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Query.prototype.start = function() &#123;</span><br><span class="line">  this.emit(&#x27;packet&#x27;, new Packets.ComQueryPacket(this.sql));</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这个方法创建了一个ComQueryPacket，然后通过packet事件通知其他组件。Query是一个EventEmitter，所以可以通过事件和Query对象通信。</p>
+<p>lib/protocol/packets/ComQueryPacket.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">module.exports = ComQueryPacket;</span><br><span class="line">function ComQueryPacket(sql) &#123;</span><br><span class="line">  this.command = 0x03;</span><br><span class="line">  this.sql     = sql;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ComQueryPacket.prototype.write = function(writer) &#123;</span><br><span class="line">  writer.writeUnsignedNumber(1, this.command);</span><br><span class="line">  writer.writeString(this.sql);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">ComQueryPacket.prototype.parse = function(parser) &#123;</span><br><span class="line">  this.command = parser.parseUnsignedNumber(1);</span><br><span class="line">  this.sql     = parser.parsePacketTerminatedString();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>ComQueryPacket类仅仅有两个成员，command和sql</p>
+<p>根据mysql文档</p>
+<blockquote>
+<p>A COM_QUERY is used to send the server a text-based query that is executed immediately.</p>
+</blockquote>
+<p>Query.prototype.start方法emit的packet事件，会触发在Protocol.prototype._enqueue中设置的handler</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Protocol.prototype._enqueue = function(sequence) &#123;</span><br><span class="line">    sequence</span><br><span class="line">    .on(&#x27;error&#x27;, function(err) &#123;</span><br><span class="line">      self._delegateError(err, sequence);</span><br><span class="line">    &#125;)</span><br><span class="line">    .on(&#x27;packet&#x27;, function(packet) &#123;</span><br><span class="line">      sequence._timer.active();</span><br><span class="line">      self._emitPacket(packet);</span><br><span class="line">    &#125;)</span><br><span class="line">    .on(&#x27;timeout&#x27;, function() &#123;</span><br><span class="line">      var err = new Error(sequence.constructor.name + &#x27; inactivity timeout&#x27;);</span><br><span class="line"></span><br><span class="line">      err.code    = &#x27;PROTOCOL_SEQUENCE_TIMEOUT&#x27;;</span><br><span class="line">      err.fatal   = true;</span><br><span class="line">      err.timeout = sequence._timeout;</span><br><span class="line"></span><br><span class="line">      self._delegateError(err, sequence);</span><br><span class="line">    &#125;);</span><br><span class="line">    sequence.on(&#x27;end&#x27;, function () &#123;</span><br><span class="line">      self._dequeue(sequence);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到这里handler调用了self._emitPacket(packet);</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Protocol.prototype._emitPacket = function(packet) &#123;</span><br><span class="line">  var packetWriter = new PacketWriter();</span><br><span class="line">  packet.write(packetWriter);</span><br><span class="line">  this.emit(&#x27;data&#x27;, packetWriter.toBuffer(this._parser));</span><br><span class="line"></span><br><span class="line">  if (this._config.debug) &#123;</span><br><span class="line">    this._debugPacket(false, packet);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>_emitPacket调用了packet.write</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ComQueryPacket.prototype.write = function(writer) &#123;</span><br><span class="line">  writer.writeUnsignedNumber(1, this.command);</span><br><span class="line">  writer.writeString(this.sql);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>packet.write调用了PacketWriter的writeUnsignedNumber和writeString方法</p>
+<p>PacketWriter定义<br>lib/protocol/PacketWriter.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">module.exports = PacketWriter;</span><br><span class="line">function PacketWriter() &#123;</span><br><span class="line">  this._buffer = null;</span><br><span class="line">  this._offset = 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>writeUnsignedNumber方法把一个number写到内部的一个buffer，this._buffer</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PacketWriter.prototype.writeUnsignedNumber = function(bytes, value) &#123;</span><br><span class="line">  this._allocate(bytes);</span><br><span class="line"></span><br><span class="line">  for (var i = 0; i &lt; bytes; i++) &#123;</span><br><span class="line">    this._buffer[this._offset++] = (value &gt;&gt; (i * 8)) &amp; 0xff;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>writeString方法把一个string写到this._buffer</p>
+<p>接下来Protocol emit了data事件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this.emit(&#x27;data&#x27;, packetWriter.toBuffer(this._parser));</span><br></pre></td></tr></table></figure>
+<p>这里调用了packetWriter.toBuffer</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">PacketWriter.prototype.toBuffer = function toBuffer(parser) &#123;</span><br><span class="line">  if (!this._buffer) &#123;</span><br><span class="line">    this._buffer = Buffer.alloc(0);</span><br><span class="line">    this._offset = 0;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  var buffer  = this._buffer;</span><br><span class="line">  var length  = this._offset;</span><br><span class="line">  var packets = Math.floor(length / MAX_PACKET_LENGTH) + 1;</span><br><span class="line"></span><br><span class="line">  this._buffer = Buffer.allocUnsafe(length + packets * 4);</span><br><span class="line">  this._offset = 0;</span><br><span class="line"></span><br><span class="line">  for (var packet = 0; packet &lt; packets; packet++) &#123;</span><br><span class="line">    var isLast = (packet + 1 === packets);</span><br><span class="line">    var packetLength = (isLast)</span><br><span class="line">      ? length % MAX_PACKET_LENGTH</span><br><span class="line">      : MAX_PACKET_LENGTH;</span><br><span class="line"></span><br><span class="line">    var packetNumber = parser.incrementPacketNumber();</span><br><span class="line"></span><br><span class="line">    this.writeUnsignedNumber(3, packetLength);</span><br><span class="line">    this.writeUnsignedNumber(1, packetNumber);</span><br><span class="line"></span><br><span class="line">    var start = packet * MAX_PACKET_LENGTH;</span><br><span class="line">    var end   = start + packetLength;</span><br><span class="line"></span><br><span class="line">    this.writeBuffer(buffer.slice(start, end));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return this._buffer;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这个方法调整this._buffer的内容，具体步骤是，如果this._buffer的长度超过了MAX_PACKET_LENGTH，那么把this._buffer分成几个packet，每个packet的最大长度是MAX_PACKET_LENGTH。同时在每个packet前添加4个字节的内容，前三个字节代表packet的长度，第四个字节代表packet的序号。然后返回调整后的this._buffer</p>
+<p>Protocol emit的data事件会触发在Connection中设置的handler</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">this._protocol.on(&#x27;data&#x27;, function(data) &#123;</span><br><span class="line">  connection._socket.write(data);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这里把packet写到connection._socket中，服务器就会收到packet。</p>
+<p>当mysql服务器收到客户端的数据的时候，先读取4个字节，获得packet的长度和序号，然后读取第一个packet，接下来又读取4个字节，获得下一个packet的长度和序号，依次类推，最终读取完客户端发送的数据。</p>
+<p>MAX_PACKET_LENGTH的定义是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var MAX_PACKET_LENGTH            = Math.pow(2, 24) - 1; // 大概16M</span><br></pre></td></tr></table></figure>
+<p>明显一般的packet都不会超过16M，所以服务器收到的大部分packet都类似于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">三个字节长度 - 1个字节序号 - packet内容</span><br></pre></td></tr></table></figure>
+<p>服务器根据长度读取到packet的内容，然后从内容中解析出，要执行的command的类型，比如0x03，和对应的sql。</p>
+<h2 id="服务器返回数据"><a href="#服务器返回数据" class="headerlink" title="服务器返回数据"></a>服务器返回数据</h2><p>服务器返回数据的时候，会往Connection._socket中写数据，因此会触发Connection的data事件</p>
+<p>在Connection的connect方法中，设置了Connection.socket的data事件的handler</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">this._socket.on(&#x27;data&#x27;, wrapToDomain(connection, function (data) &#123;</span><br><span class="line">  connection._protocol.write(data);</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+
+<p>服务器返回的数据交给Parser，Parser解析出服务器返回的查询结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Protocol.prototype.write = function(buffer) &#123;</span><br><span class="line">  this._parser.write(buffer);</span><br><span class="line">  return true;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.suyuan.me/2019/06/20/Node-js-mysqljs-mysql-package/" data-id="clkqg345j0002j4ote9ru5uoy" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/03/09/linux-namespace/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          linux namespace
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">二叉树遍历递归和非递归</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/04/29/%E7%BB%95%E8%BF%87new-bing%E9%99%90%E5%88%B6/">绕过new bing限制</a>
+          </li>
+        
+          <li>
+            <a href="/2023/03/09/linux-namespace/">linux namespace</a>
+          </li>
+        
+          <li>
+            <a href="/2019/06/20/Node-js-mysqljs-mysql-package/">Node.js mysqljs/mysql package</a>
+          </li>
+        
+          <li>
+            <a href="/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/">二叉树遍历递归和非递归</a>
+          </li>
+        
+          <li>
+            <a href="/2019/06/18/Go-Module-in-2019/">Go Module in 2019</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2023 Su Yuan<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

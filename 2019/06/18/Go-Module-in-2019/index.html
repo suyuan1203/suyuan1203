@@ -5,13 +5,17 @@
   
 
   
-  <title>Archives: 2023 | Su Yuan</title>
+  <title>Go Module in 2019 | Su Yuan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Su Yuan">
-<meta property="og:url" content="https://blog.suyuan.me/archives/2023/index.html">
+  <meta name="description" content="2018年发布的Go 1.11包含了Go modules 如果go命令在GOPATH&#x2F;src以外的目录运行，并且这个目录有一个go.mod文件，那么go是在module模式下运行。 目前可以通过$GO111MODULE环境变量来控制是否使用go module mode。这个环境变量，默认值是auto。 计划在2019年8月，发布Go 1.13，这个版本中$GO111MODULE会被默认设置为on。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go Module in 2019">
+<meta property="og:url" content="https://blog.suyuan.me/2019/06/18/Go-Module-in-2019/index.html">
 <meta property="og:site_name" content="Su Yuan">
+<meta property="og:description" content="2018年发布的Go 1.11包含了Go modules 如果go命令在GOPATH&#x2F;src以外的目录运行，并且这个目录有一个go.mod文件，那么go是在module模式下运行。 目前可以通过$GO111MODULE环境变量来控制是否使用go module mode。这个环境变量，默认值是auto。 计划在2019年8月，发布Go 1.13，这个版本中$GO111MODULE会被默认设置为on。">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-06-18T15:18:39.000Z">
+<meta property="article:modified_time" content="2023-07-31T05:43:38.992Z">
 <meta property="article:author" content="Su Yuan">
 <meta name="twitter:card" content="summary">
   
@@ -62,59 +66,74 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2023" class="archive-year">2023</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/04/29/%E7%BB%95%E8%BF%87new-bing%E9%99%90%E5%88%B6/" class="archive-article-date">
-  <time datetime="2023-04-29T12:42:31.000Z" itemprop="datePublished">Apr 29</time>
+        <section id="main"><article id="post-Go-Module-in-2019" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/06/18/Go-Module-in-2019/" class="article-date">
+  <time datetime="2019-06-18T15:18:39.000Z" itemprop="datePublished">2019-06-18</time>
 </a>
-      
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/04/29/%E7%BB%95%E8%BF%87new-bing%E9%99%90%E5%88%B6/">绕过new bing限制</a>
+    <h1 class="article-title" itemprop="name">
+      Go Module in 2019
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/03/09/linux-namespace/" class="archive-article-date">
-  <time datetime="2023-03-09T23:17:58.000Z" itemprop="datePublished">Mar 9</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/03/09/linux-namespace/">linux namespace</a>
-    </h1>
-  
+        <p>2018年发布的Go 1.11包含了Go modules</p>
+<p>如果go命令在GOPATH/src以外的目录运行，并且这个目录有一个go.mod文件，那么go是在module模式下运行。</p>
+<p>目前可以通过$GO111MODULE环境变量来控制是否使用go module mode。这个环境变量，默认值是auto。</p>
+<p>计划在2019年8月，发布Go 1.13，这个版本中$GO111MODULE会被默认设置为on。</p>
+<p>目前有大量的工具、源码默认认为go的module放在GOPATH，所以如果迁移到go module mode的话，有大量的工具、源码要修改。</p>
+<p>为了简化迁移的工作，golang团队提供了一个package，golang.org/x/tools/go/packages，这个package抽象了寻找和加载go source code的操作，所以新的代码可以使用这个package。</p>
+<p>go的module是分散在不同的host上的，任何人都建立自己的host。这样的好处是，项目中引用private package很容易，但是这也带来一个问题，就是很难找到所有的module，或者在所有的module中查找一个module。</p>
+<p>go新的module系统提供了一个go module index服务，利用这个服务，用户可以更容易发现新的module，更容易查找一个module。</p>
+<p>go module index服务还会给每一个module提供一个go.sum文件，这个文件会列出一个module依赖的所有其他module的hash，这样go就可以利用go.sum来确保获得的其他module没有被修改过。</p>
+<p>Node.js社区可以在考虑建立一个分布式的module registry，<a target="_blank" rel="noopener" href="https://github.com/entropic-dev/entropic">https://github.com/entropic-dev/entropic</a></p>
+<p>参考</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://blog.golang.org/modules2019">https://blog.golang.org/modules2019</a></li>
+</ul>
 
-    </header>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.suyuan.me/2019/06/18/Go-Module-in-2019/" data-id="clkqg345h0001j4otfklkfkbq" class="article-share-link">Share</a>
+      
+      
+    </footer>
   </div>
-</article>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          二叉树遍历递归和非递归
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Node.js简单Promise实现</div>
+    </a>
   
+</nav>
 
+  
+</article>
 
 </section>
         
