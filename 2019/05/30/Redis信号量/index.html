@@ -15,7 +15,7 @@
 <meta property="og:description" content="信号量可以只使用一个数字来实现，但是这样的信号量没有timeout，如果获得信号量的client出错退出了，那么这个信号量就得不到释放，我们可以利用zset来实现一个支持timeout的信号量。 思路是每次获取信号量的时候，生成一个id，然后把id添加到zset中，value设置为当前的时戳。然后检查id在zset中的rank，如果超过信号量数量limit，那么获取信号量失败，否则获取信号量成功，">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2019-05-30T15:16:10.000Z">
-<meta property="article:modified_time" content="2023-07-31T05:43:38.992Z">
+<meta property="article:modified_time" content="2023-08-03T09:33:28.350Z">
 <meta property="article:author" content="Su Yuan">
 <meta name="twitter:card" content="summary">
   
@@ -36,7 +36,6 @@
   <div id="container">
     <div id="wrap">
       <header id="header">
-  <div id="banner"></div>
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
@@ -111,7 +110,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" data-id="clkqg345m0005j4otd5hx3gdp" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" data-id="clkuym48m0005idpx4dh7hh2o" class="article-share-link">Share</a>
       
       
     </footer>
