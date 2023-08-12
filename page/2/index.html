@@ -63,6 +63,77 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-统计语言模型和隐马尔科夫模型" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" class="article-date">
+  <time datetime="2019-05-22T15:14:43.000Z" itemprop="datePublished">2019-05-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/">统计语言模型和隐马尔科夫模型</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>”数学之美”是一本科普书籍，作者吴军是语音识别，自然语言处理方面的专家。这本书讲了一些数学在语音识别，自然语言处理方面的应用。</p>
+<p>第三章和第五章分别讲了统计语言模型和隐含马尔可夫模型，很有意思，这篇文章做一下总结。</p>
+<p>语音识别要解决的问题是，我们拿到了一段语音，如何推测出原始的文本是什么。假设这段语音的内容是”你好“，那么我们希望根据语音能推测出原始文本是”你好“。</p>
+<p>我们把语音看做一个序列，o1, o2, o3, … , on，每个字母代表一个语音片段，原始文本看做另一个序列s1, s2, s3, … , sn。</p>
+<p>假设语音是汉语，那么我们s1, s2, s3 … sn是汉字的序列。一般的思路是，我们尝试找出一定的规则，在给定语音序列的时候，推测出文字序列。或者我们可以换一个思路。因为我们已知文字序列是汉字的序列，那么汉字组成的序列的数量是有限的，在给定语音序列的时候，我们计算出每个汉字序列出现的概率，概率最大的那个组合就是我们想要的汉字序列。</p>
+<p>例如给定语音序列o1, o2, o3, … , on，我们计算出P(”中国“) = 0.9, P(”你好“) = 0.6, 那么中国就更可能是语音对应的文本。</p>
+<p>也就是说我们无法100%根据语音推算出原始文本是什么，我们只能说，给定语音，我们认为原始文本是s1, s2, s3, …, sn的概率最大。也就是P(s1, s2, s3, … | o1, o2, o3, …)最大。那么如何计算P(s1, s2, s3, … | o1, o2, o3, …)呢？</p>
+<p>根据贝叶斯公式，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(s1, s2, s3, ... | o1, o2, o3, ...) = P(o1, o2, o3, ... | s1, s2, s3, ...) P(s1, s2, s3, ...) / P(o1, o2, o3, ...)</span><br></pre></td></tr></table></figure>
+
+<p>因为o1, o2, o3是语音序列，这个序列一旦产生就不会再变了，因此P(o1, o2, o3, …)是一个可以忽略的常数，最大化P(s1, s2, s3, … | o1, o2, o3, …)，相当于最大化P(o1, o2, o3, … | s1, s2, s3, …) P(s1, s2, s3, …)。</p>
+<p>我们先来计算P(o1, o2, o3, … | s1, s2, s3, …)，按照条件概率</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(o1, o2, o3, ... | s1, s2, s3, ...) = P(o1|s1...)P(o2|o1,s1...)P(o3|o2,o1,s1...)...P(on|o(n-1)...o1,s1...)</span><br></pre></td></tr></table></figure>
+
+<p>这个概率计算还是比较复杂的，有一个简化的办法，我们假设o(t)仅仅和s(t)相关，这个假设叫做独立输出假设。这样一来上面的等式可以简化为:</p>
+<p>P(o1, o2, o3, … | s1, s2, s3, …) = P(o1|s1)P(o2|s2)P(o3|s3)…P(on|sn) =  ∏P(ot|st)</p>
+<p>我们用这个简化的概率来近似原来的概率。</p>
+<p>然后来看P(s1, s2, s3, …)，同样根据条件概率</p>
+<p>P(s1, s2, s3, …) = P(s1)P(s2|s1)P(s3|s1,s2)…P(sn|s1, s2, …)</p>
+<p>同样我们简化这个概率的计算，我们假设s(t)仅仅和s(t-1)相关，也就是说一个状态仅仅和前一个状态有关，这个假设叫做马尔科夫假设。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(s1, s2, s3, ...) = P(s1)P(s2|s1)P(s3|s2)...P(sn|s(n-1)) = ∏ P(s(t) | s(t-1))</span><br></pre></td></tr></table></figure>
+
+<p>现在我们来看如何计算∏P(ot|st)和∏ P(s(t) | s(t-1))。这两个值可以用人工标注的数据来估算。</p>
+<p>我们可以选择很多语音片段，然后人工标注对应的文本，也就是说我们准备了很多(s1, s2, …, sn)到(o1, o2, …, on)的对应关系。</p>
+<p>我们注意到 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(ot|st) = P(ot, st) / p(st)。</span><br></pre></td></tr></table></figure>
+
+<p>在标注数据中，我们统计ot和st同时出现的次数，N(ot, st)，把这个值除以整个标注数据的大小N，这里的N可以是所有标注数据的序列长度之和。那么根据大数定理，在有足够多的数据的情况下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">N(ot, st) / N ≃ P(ot, st) / p(st) 。</span><br></pre></td></tr></table></figure>
+
+<p>再来看P(s(t) | s(t-1))，同样因为P(s(t) | s(t-1)) = P(st, s(t-1)) / P(s(t-1))，而通过标注的数据，我们统计st和s(t-1)同时出现的次数N(st, s(t-1))，然后除以标注数据的大小N, 那么</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">N(st, s(t-1) / N ≃ P(st, s(t-1)) / P(s(t-1)) 。</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，通过标注的数据，我们就可以计算出∏P(ot|st)和∏ P(s(t) | s(t-1))，而通过∏P(ot|st)和∏ P(s(t) | s(t-1))，我们可以计算出，在给定o1, o2, …, on序列的情况下，每种s1, s2, …, sn的概率，最大概率的那个序列就很可能是语音的原始文本。这样就实现了语音识别的功能。</p>
+<p>P(o1, o2, o3, … | s1, s2, s3, …)被称作声学模型，而P(ot|st)和P(s(t) | s(t-1))就是模型的参数，在给定标注数据的情况下，我们可以计算出模型的参数。而根据模型参数，给定o1, o2, …, o3序列，我们可以计算出每个s1, s2, …, sn序列的概率。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="cll7bnqq4000digmy8vx367gr" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-读巴黎圣母院" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" class="article-date">
@@ -94,7 +165,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="clkuym48v000fidpx12mm1zn9" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="cll7bnqq5000gigmydnfqddou" class="article-share-link">Share</a>
       
       
     </footer>
@@ -138,7 +209,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="clkuym48y000iidpxfxn71zot" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="cll7bnqq7000jigmyezsf07m9" class="article-share-link">Share</a>
       
       
     </footer>
@@ -184,7 +255,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="clkuym48v000eidpxadl30yob" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="cll7bnqq5000figmy06v2f62y" class="article-share-link">Share</a>
       
       
     </footer>
@@ -244,7 +315,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="clkuym48u000didpx9kyg15ao" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="cll7bnqq4000eigmygm87d24g" class="article-share-link">Share</a>
       
       
     </footer>
@@ -296,7 +367,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="clkuym48x000hidpxhayw7qbm" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="cll7bnqq6000iigmy6fs3grks" class="article-share-link">Share</a>
       
       
     </footer>
@@ -342,7 +413,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" data-id="clkuym48s000aidpxh1kme4rd" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" data-id="cll7bnqq2000aigmya427hiqv" class="article-share-link">Share</a>
       
       
     </footer>
@@ -392,7 +463,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/10/06/%E8%AF%BB%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%80%9A%E5%8F%B2/" data-id="clkuym48w000gidpxcapp248u" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/10/06/%E8%AF%BB%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%80%9A%E5%8F%B2/" data-id="cll7bnqq6000higmy04nr48op" class="article-share-link">Share</a>
       
       
     </footer>
@@ -449,7 +520,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/09/29/So-good-they-can-t-ignore-you/" data-id="clkuym48n0006idpxcfr67p4i" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/09/29/So-good-they-can-t-ignore-you/" data-id="cll7bnqpy0006igmy3deg9ys5" class="article-share-link">Share</a>
       
       
     </footer>
@@ -524,7 +595,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/07/04/%E4%BA%BA%E7%94%9F%E6%98%AF%E4%B8%80%E6%9D%A1%E5%AF%82%E5%AF%9E%E7%9A%84%E8%B7%AF%EF%BC%8C%E8%A6%81%E6%9C%89%E4%B8%80%E6%9C%AC%E6%9C%89%E8%B6%A3%E7%9A%84%E4%B9%A6%E6%9D%A5%E6%B6%88%E7%A3%A8%E6%97%85%E9%80%94/" data-id="clkuym48r0009idpxa5927l6c" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/07/04/%E4%BA%BA%E7%94%9F%E6%98%AF%E4%B8%80%E6%9D%A1%E5%AF%82%E5%AF%9E%E7%9A%84%E8%B7%AF%EF%BC%8C%E8%A6%81%E6%9C%89%E4%B8%80%E6%9C%AC%E6%9C%89%E8%B6%A3%E7%9A%84%E4%B9%A6%E6%9D%A5%E6%B6%88%E7%A3%A8%E6%97%85%E9%80%94/" data-id="cll7bnqq10009igmygdcqfs2l" class="article-share-link">Share</a>
       
       
     </footer>
@@ -557,7 +628,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">August 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
     </div>
   </div>
 
@@ -568,6 +639,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2023/08/12/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-12/">浏览记录2023-08-12</a>
+          </li>
         
           <li>
             <a href="/2023/04/29/%E7%BB%95%E8%BF%87new-bing%E9%99%90%E5%88%B6/">绕过new bing限制</a>
@@ -583,10 +658,6 @@
         
           <li>
             <a href="/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/">二叉树遍历递归和非递归</a>
-          </li>
-        
-          <li>
-            <a href="/2019/06/18/Go-Module-in-2019/">Go Module in 2019</a>
           </li>
         
       </ul>
