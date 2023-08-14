@@ -63,6 +63,77 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Node-js实现内网穿透" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" class="article-date">
+  <time datetime="2019-05-25T15:15:17.000Z" itemprop="datePublished">2019-05-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">Node.js实现内网穿透</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>如何在办公室外调用办公室内一台服务器上部署的服务？</p>
+<p>如果办公室有固定的IP地址，而且可以映射到内网的机器，那么这个问题很简单。如果无法通过这种方式访问内网的机器，我们还可以通过内网穿透的办法来解决。</p>
+<p>基本的思路是，需要有一台公网的服务器，服务器上运行一个程序，这个程序监听两个端口，分别供外部客户端和内网客户端连接，然后这个程序负责转发双方的通信给对方。</p>
+<p><img src="https://wx3.sinaimg.cn/mw690/66ae68a1ly1g3cj95381qj20oc0gsjsj.jpg"></p>
+<p>server.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket;</span><br><span class="line">const inServer = net.createServer(function(socket) &#123;</span><br><span class="line">  inSocket = socket;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer = net.createServer(function(socket) &#123;</span><br><span class="line">  outSocket = socket;</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
+
+<p>in_client.js 内网的客户端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">const socket = net.connect(&#123; port: 4001 &#125;, () =&gt; &#123;</span><br><span class="line">  </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;data&#x27;, (data) =&gt; &#123;</span><br><span class="line">  console.log(data.toString());</span><br><span class="line">  socket.write(&#x27;Data from in office&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;end&#x27;, () =&gt; &#123;</span><br><span class="line">  console.log(&#x27;on end&#x27;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>out_client.js 外网的客户端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">const socket = net.connect(&#123; port: 4002 &#125;, () =&gt; &#123;</span><br><span class="line">  socket.write(&#x27;Data from outside&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;data&#x27;, (data) =&gt; &#123;</span><br><span class="line">  console.log(data.toString());</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;end&#x27;, () =&gt; &#123;</span><br><span class="line">  console.log(&#x27;on end&#x27;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>先运行server.js，然后运行in_client.js，再运行out_client.js</p>
+<p>然后我们可以看到in_client.js和out_client.js互相可以通过server.js通信</p>
+<p>这里in_client.js需要先运行，然后再运行out_client.js。类似于我们需要先在内网机器上运行teamviewer，然后再在外部运行teamviewer。</p>
+<p>然后我们就可以扩展in_client和out_client的功能，例如当out_client发送特定的命令时，in_client就传输本地的屏幕和键盘事件给对方，这样就能实现类似teamviewer的远程桌面。</p>
+<p>回到我们开始的问题，如果内网机器上部署了一个service，如何通过out_client访问到呢？</p>
+<p>我们可以在in_client启动时就连接要请求的服务，然后等待外部的访问</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let serviceSocket, socket;</span><br><span class="line"></span><br><span class="line">socket = net.connect(&#123; port: 4001 &#125;); // 连接公网服务器</span><br><span class="line"></span><br><span class="line">serviceSocket = net.connect(&#123; port: 8080 &#125;); // 假设在http://localhost:8080有一个服务</span><br><span class="line"></span><br><span class="line">socket.pipe(serviceSocket);  // 从服务器转发过来的数据都会发送给service</span><br><span class="line">serviceSocket.pipe(socket); // service返回的数据都会转发给socket，进而转发到服务器</span><br></pre></td></tr></table></figure>
+
+<p>server.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket;</span><br><span class="line">const inServer = net.createServer(function(socket) &#123;</span><br><span class="line">  inSocket = socket;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer = net.createServer(function(socket) &#123;</span><br><span class="line">  outSocket = socket;</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
+
+<p>这时我们访问<a href="http://localhost:4002，我们的请求就会被转发到http://localhost:8080">http://localhost:4002，我们的请求就会被转发到http://localhost:8080</a></p>
+<p>仍然有一个问题是，http请求完成以后，客户端过一段时间以后会把底层的TCP连接关掉，那么我们在server上建立的，inSocket和outSocket之间的pipe就断掉了。</p>
+<p>解决这个问题的思路是，在server上再添加一个listen的socket，这个socket专门用来和in_client通信，告诉in_client有新的连接请求，in_client发现有新的连接请求以后，再和server建立一个用于转发tcp的连接，这个连接可以在通信完就关闭掉。</p>
+<p>我们通过这个新建立的socket发送控制命令给in_client，告诉它有新的连接了，所以我们把这个socket叫controlSocket</p>
+<p>server.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket, controlSocket;</span><br><span class="line"></span><br><span class="line">// 这里我们添加了controlServer</span><br><span class="line">const controlServer = net.createServer();</span><br><span class="line">controlServer.on(&#x27;connection&#x27;, (socket) =&gt; &#123;</span><br><span class="line">  controlSocket = socket;</span><br><span class="line">&#125;);</span><br><span class="line">controlServer.listen(4003);</span><br><span class="line"></span><br><span class="line">const inServer = net.createServer();</span><br><span class="line">inServer.on(&#x27;connection&#x27;, function(socket) &#123;</span><br><span class="line">  inSocket = socket;</span><br><span class="line">  // 这里我们先建立了外部的socket，然后才通过控制socket</span><br><span class="line">  // 告诉in_client建立内部的socket，所以把pipe的代码放在这里</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer = net.createServer();</span><br><span class="line">outServer.on(&#x27;connection&#x27;, function(socket) &#123;</span><br><span class="line">  outSocket = socket;</span><br><span class="line">  controlSocket.write(&#x27;new_conn_cmd&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
+
+<p>in_client.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let serviceSocket, outSocket, controlSocket;</span><br><span class="line"></span><br><span class="line">controlSocket = net.connect(&#123; port: 4003 &#125;);</span><br><span class="line"></span><br><span class="line">controlSocket.on(&#x27;data&#x27;, (data) =&gt; &#123;</span><br><span class="line">  // 这里没有处理命令的长度</span><br><span class="line">  data = data.toString();</span><br><span class="line">  if (data === &#x27;new_conn_cmd&#x27;) &#123;</span><br><span class="line">    outSocket = net.connect(&#123; port: 4001 &#125;);</span><br><span class="line">    serviceSocket = net.connect(&#123; port: 8080 &#125;);</span><br><span class="line">    outSocket.pipe(serviceSocket);</span><br><span class="line">    serviceSocket.pipe(outSocket);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    console.log(&#x27;Invalid commadn&#x27;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这时我们再请求<a target="_blank" rel="noopener" href="http://127.0.0.1:4002/%EF%BC%8C%E7%AD%89%E4%B8%80%E6%AE%B5%E6%97%B6%E9%97%B4%EF%BC%8C%E8%BF%9E%E6%8E%A5%E4%BC%9A%E8%A2%AB%E6%96%AD%E6%8E%89%EF%BC%8C%E4%B8%8B%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%97%B6%E5%80%99%E4%BC%9A%E5%BB%BA%E7%AB%8B%E6%96%B0%E7%9A%84%E8%BF%9E%E6%8E%A5%E3%80%82%E5%9B%A0%E4%B8%BAhttp%E5%8D%8F%E8%AE%AE%E4%BC%9A%E5%A4%8D%E7%94%A8%E5%BA%95%E5%B1%82%E7%9A%84%E8%BF%9E%E6%8E%A5%EF%BC%8C%E7%9F%AD%E6%97%B6%E9%97%B4%E5%86%85%E8%BF%9E%E7%BB%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E4%B8%8D%E4%BC%9A%E5%BB%BA%E7%AB%8B%E6%96%B0%E7%9A%84%E8%BF%9E%E6%8E%A5">http://127.0.0.1:4002/，等一段时间，连接会被断掉，下一次请求的时候会建立新的连接。因为http协议会复用底层的连接，短时间内连续的请求不会建立新的连接</a> 。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" data-id="cllbi74xu0003imoz06ox29ko" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-统计语言模型和隐马尔科夫模型" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" class="article-date">
@@ -124,7 +195,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="cll7bnqq4000digmy8vx367gr" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="cllbi74yg000eimozauqv6dvu" class="article-share-link">Share</a>
       
       
     </footer>
@@ -165,7 +236,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="cll7bnqq5000gigmydnfqddou" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="cllbi74yj000himozhla9flsr" class="article-share-link">Share</a>
       
       
     </footer>
@@ -209,7 +280,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="cll7bnqq7000jigmyezsf07m9" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="cllbi74yl000kimozeoaug18l" class="article-share-link">Share</a>
       
       
     </footer>
@@ -255,7 +326,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="cll7bnqq5000figmy06v2f62y" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="cllbi74yi000gimoz9d5q6k8c" class="article-share-link">Share</a>
       
       
     </footer>
@@ -315,7 +386,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="cll7bnqq4000eigmygm87d24g" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="cllbi74yh000fimozhm1e90qp" class="article-share-link">Share</a>
       
       
     </footer>
@@ -367,7 +438,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="cll7bnqq6000iigmy6fs3grks" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="cllbi74yl000jimoz0rrsc8rd" class="article-share-link">Share</a>
       
       
     </footer>
@@ -413,7 +484,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" data-id="cll7bnqq2000aigmya427hiqv" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" data-id="cllbi74y7000aimozghm07bf3" class="article-share-link">Share</a>
       
       
     </footer>
@@ -463,7 +534,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/10/06/%E8%AF%BB%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%80%9A%E5%8F%B2/" data-id="cll7bnqq6000higmy04nr48op" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/10/06/%E8%AF%BB%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%80%9A%E5%8F%B2/" data-id="cllbi74yk000iimozfjbhadsf" class="article-share-link">Share</a>
       
       
     </footer>
@@ -520,82 +591,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/09/29/So-good-they-can-t-ignore-you/" data-id="cll7bnqpy0006igmy3deg9ys5" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-人生是一条寂寞的路，要有一本有趣的书来消磨旅途" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/07/04/%E4%BA%BA%E7%94%9F%E6%98%AF%E4%B8%80%E6%9D%A1%E5%AF%82%E5%AF%9E%E7%9A%84%E8%B7%AF%EF%BC%8C%E8%A6%81%E6%9C%89%E4%B8%80%E6%9C%AC%E6%9C%89%E8%B6%A3%E7%9A%84%E4%B9%A6%E6%9D%A5%E6%B6%88%E7%A3%A8%E6%97%85%E9%80%94/" class="article-date">
-  <time datetime="2015-07-04T15:00:57.000Z" itemprop="datePublished">2015-07-04</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/04/%E4%BA%BA%E7%94%9F%E6%98%AF%E4%B8%80%E6%9D%A1%E5%AF%82%E5%AF%9E%E7%9A%84%E8%B7%AF%EF%BC%8C%E8%A6%81%E6%9C%89%E4%B8%80%E6%9C%AC%E6%9C%89%E8%B6%A3%E7%9A%84%E4%B9%A6%E6%9D%A5%E6%B6%88%E7%A3%A8%E6%97%85%E9%80%94/">人生是一条寂寞的路，要有一本有趣的书来消磨旅途</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>“三十而立”是一本很短的小说.</p>
-<p>王小波的小说语言粗俗, 贫，很好笑。读他的小说，总有种荒诞的感觉。</p>
-<p>这篇小说里有一段很精彩。</p>
-<blockquote>
-<p>我妈妈始终爱我。她对小转铃说，人生是一条寂寞的路，要有一本有趣的书来消磨旅途。 我爸爸这本书无聊之极，叫她懊悔当初怎么挑了这么一本书看。她羡慕铃子有了一本好书，这种书只有拿性爱做钥匙才能打得开。我和小转铃好的事知道的人很少，她居然能打探出来，足见手段高明。我妈妈喜欢小转铃，她说铃子“真是个好女孩”；可是我最后还是搞上了二妞子。这个事里多少有点和我妈抬杠的意思。</p>
-</blockquote>
-<blockquote>
-<p>我认为无论是二妞子还是小转铃都不会背叛我，所以很自信地说：“妈，你知道我什么了？”</p>
-</blockquote>
-<blockquote>
-<p>“你和你爸爸到底不一样，你是我生的嘛！”</p>
-</blockquote>
-<blockquote>
-<p>”怎么啦？“</p>
-</blockquote>
-<blockquote>
-<p>“写诗呀，你的诗文我全看过，写得真他妈的带劲。你还说，活着就是要正道, 精彩。你还不知道道是什么，告诉你，道就是你妈，是你妈把你生成这样的！”</p>
-</blockquote>
-<blockquote>
-<p>她啪一声打个榧子，转瞬之间，年轻时倾国倾城的神采又回到脸上来。 我觉得全身的血都往头上涌，差一点中了风。 写诗乃是我的大秘密，这种经历与性爱相仿: 灵感来临时就如高潮，写在纸上就如射精，只有和我有性关系的女人才能看，怎么能叫我妈见到? 我顿时觉的自己成了褪毛的鸡，连个遮屁眼的东西都没有了。 桌子上火柴，香烟，筷子劈哩啪啦落了一地，我急红了脸吼出来:</p>
-</blockquote>
-<blockquote>
-<p>“小转玲这坏蛋！ 下次见面宰了她。 妈，她把我稿子给你了? 还给我吧！”</p>
-</blockquote>
-<blockquote>
-<p>“稿子还在她那儿，我复印留了底。 你想要，拿钱来换，影印费三百元！”</p>
-</blockquote>
-<blockquote>
-<p>“太贵了，半价怎么样? 算了算了，反正看进你眼里也拔不出来了。 你别再提我写的东西，那不是给人看的，行不行?尤其不能给爸爸看，你给他看了我就自杀。”</p>
-</blockquote>
-<blockquote>
-<p>“好，不给他看。 真怪了，这又不是什么坏事情，你躲我干吗。 你还写了什么? 拿来给我看看。”</p>
-</blockquote>
-<p>“人生是一条寂寞的路，要有一本有趣的书来消磨旅途”，想找另一半的人应该考虑这条建议。</p>
-<p>王小波是个有趣的人。他追他老婆李银河的时候，俩人时常通信。有一封信收录在“人为什么活着”中：</p>
-<blockquote>
-<p>对了，要说模式化的生活，我可真腻味它。见也见烦了，且不说它的苦处。中国人说苦处也就是乐处，这就可以说明有人为什么爱吃臭豆腐：他们都能从臭里体验出香来。这可以说明懒于改造世界的人多么勤于改造自己。我发誓：在改造自己以适应于社会之前非先明辨是非不可，虽然我不以为自己有资格可以为别人明辨是非。当然我净在胡扯，不过你总抱怨我不肯给你写。你知道写多了就不准是要紧的话，多写无非是可以让你解闷。我相信你不会怪我没正经。真的我爱你，我们不能老在一起说大道理，我们写着玩好吗？</p>
-</blockquote>
-<p>好像李姑娘喜欢探讨人生理想，世界观，人生观，还希望王小波和她多多探讨。于是王小波就说，“姑娘，咱们还是聊点好玩的吧！”</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/07/04/%E4%BA%BA%E7%94%9F%E6%98%AF%E4%B8%80%E6%9D%A1%E5%AF%82%E5%AF%9E%E7%9A%84%E8%B7%AF%EF%BC%8C%E8%A6%81%E6%9C%89%E4%B8%80%E6%9C%AC%E6%9C%89%E8%B6%A3%E7%9A%84%E4%B9%A6%E6%9D%A5%E6%B6%88%E7%A3%A8%E6%97%85%E9%80%94/" data-id="cll7bnqq10009igmygdcqfs2l" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/09/29/So-good-they-can-t-ignore-you/" data-id="cllbi74xy0006imoz0d4dd3z8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -609,7 +605,7 @@
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next &amp;raquo;</a>
   </nav>
 
 </section>
@@ -641,6 +637,10 @@
       <ul>
         
           <li>
+            <a href="/2023/08/15/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%95-2023-08-15/">浏览记录-2023-08-15</a>
+          </li>
+        
+          <li>
             <a href="/2023/08/12/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-12/">浏览记录2023-08-12</a>
           </li>
         
@@ -654,10 +654,6 @@
         
           <li>
             <a href="/2019/06/20/Node-js-mysqljs-mysql-package/">Node.js mysqljs/mysql package</a>
-          </li>
-        
-          <li>
-            <a href="/2019/06/19/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86%E9%80%92%E5%BD%92%E5%92%8C%E9%9D%9E%E9%80%92%E5%BD%92/">二叉树遍历递归和非递归</a>
           </li>
         
       </ul>
