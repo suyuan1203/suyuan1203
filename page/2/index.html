@@ -63,6 +63,61 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Redis信号量" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" class="article-date">
+  <time datetime="2019-05-30T15:16:10.000Z" itemprop="datePublished">2019-05-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/">Redis信号量</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>信号量可以只使用一个数字来实现，但是这样的信号量没有timeout，如果获得信号量的client出错退出了，那么这个信号量就得不到释放，我们可以利用zset来实现一个支持timeout的信号量。</p>
+<p>思路是每次获取信号量的时候，生成一个id，然后把id添加到zset中，value设置为当前的时戳。然后检查id在zset中的rank，如果超过信号量数量limit，那么获取信号量失败，否则获取信号量成功，返回id。</p>
+<p>client.js</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">async function acquireSemaphore(name, limit = 5, timeout = 10000) &#123;</span><br><span class="line">  const id = uuidv4(); // 生成一个id</span><br><span class="line">  const now = new Date().getTime(); // 当前的时戳</span><br><span class="line"></span><br><span class="line">  const pipeline = redis.pipeline();</span><br><span class="line">  await pipeline.zremrangebyscore(name, &#x27;-inf&#x27;, now - timeout); // 删除已经超时的信号量</span><br><span class="line">  await pipeline.zadd(name, now, id); </span><br><span class="line">  await pipeline.zrank(name, id);</span><br><span class="line">  const results = await pipeline.exec();</span><br><span class="line">  // 如果新添加的数据的rank没有超过limit，那么获取信号量成功</span><br><span class="line">  if (results[results.length - 1][1] &lt; limit) &#123;</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line">  redis.zrem(name, id); // 如果获取信号量失败，那么把id从zset中删除</span><br><span class="line">  return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码依赖于多个client的时间是同步的，假设有两个client A和B，B的时间落后A 10ms。A和B都尝试获取最后一个信号量，A先获取成功。A在zset中添加了最后一项。<br>zset</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5ff  1559220791205</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f1  1559220791206</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f2  1559220791207</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f3  1559220791208</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791249</span><br></pre></td></tr></table></figure>
+
+<p>接着B尝试获取信号量，因为B的时间比A落后，B写入的值是1559220791239，落后A 10ms。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791239</span><br></pre></td></tr></table></figure>
+
+<p>zset会根据value排序，结果是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5ff  1559220791205</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f1  1559220791206</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f2  1559220791207</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f3  1559220791208</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791239</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791249</span><br></pre></td></tr></table></figure>
+
+<p>这样相当于B插入在了A的前面。这样B在zset中的rank是4，没有超过信号量的限制。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">await pipeline.zrank(name, id);</span><br></pre></td></tr></table></figure>
+
+<p>这样A和B同时获得了信号量，超过了信号量的限制，这不是我们想要的结果。</p>
+<p>如果在zset中保存时戳，会有不同机器的时间不同步的问题。如果在zset中存储一个递增的id，这样不同的client在zset中的排序就不会受机器时戳的影响了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">async function acquireSemaphore(name, limit = 5, timeout = 10000) &#123;</span><br><span class="line">  const id = uuidv4();</span><br><span class="line">  const now = new Date().getTime();</span><br><span class="line">  const timeKey = name + &#x27;:time&#x27;;</span><br><span class="line">  const countKey = name + &#x27;:count&#x27;; // 这里增加了一个递增的id</span><br><span class="line"></span><br><span class="line">  let pipeline = redis.pipeline();</span><br><span class="line">  await pipeline.zremrangebyscore(timeKey, &#x27;-inf&#x27;, now - timeout);</span><br><span class="line">  await pipeline.zinterstore(</span><br><span class="line">    countKey, </span><br><span class="line">    2, </span><br><span class="line">    countKey,</span><br><span class="line">    timeKey, </span><br><span class="line">    &#x27;weights&#x27;,</span><br><span class="line">    1,</span><br><span class="line">    0</span><br><span class="line">  ); // 求timeKey和countKey的交集，过滤掉timeout的信号量</span><br><span class="line"></span><br><span class="line">  await pipeline.incr(&#x27;semaphore:count&#x27;);</span><br><span class="line">  let results = await pipeline.exec();</span><br><span class="line">  const count = results[results.length-1][1];</span><br><span class="line"></span><br><span class="line">  pipeline = redis.pipeline();</span><br><span class="line">  await pipeline.zadd(timeKey, now, id);</span><br><span class="line">  await pipeline.zadd(countKey, count, id);</span><br><span class="line">  await pipeline.zrank(countKey, id); // 后获取信号量的client的rank更高</span><br><span class="line"></span><br><span class="line">  let results2 = await pipeline.exec();</span><br><span class="line">  if (results2[results2.length - 1][1] &lt; limit) &#123;</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  redis.zrem(timeKey, id);</span><br><span class="line">  redis.zrem(countKey, id);</span><br><span class="line">  return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" data-id="clledmw2i0005i5ocep34amyy" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Node-js实现内网穿透" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" class="article-date">
@@ -124,7 +179,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" data-id="cllbi74xu0003imoz06ox29ko" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" data-id="clledmw2g0003i5ocbjz3dje9" class="article-share-link">Share</a>
       
       
     </footer>
@@ -195,7 +250,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="cllbi74yg000eimozauqv6dvu" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="clledmw2s000fi5ocbrr900bh" class="article-share-link">Share</a>
       
       
     </footer>
@@ -236,7 +291,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="cllbi74yj000himozhla9flsr" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="clledmw2v000ii5ocbggqgron" class="article-share-link">Share</a>
       
       
     </footer>
@@ -280,7 +335,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="cllbi74yl000kimozeoaug18l" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="clledmw2x000li5oc8ngm9j9n" class="article-share-link">Share</a>
       
       
     </footer>
@@ -326,7 +381,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="cllbi74yi000gimoz9d5q6k8c" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="clledmw2u000hi5oc84004vo4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -386,7 +441,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="cllbi74yh000fimozhm1e90qp" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="clledmw2t000gi5oc2ev5bd9e" class="article-share-link">Share</a>
       
       
     </footer>
@@ -438,7 +493,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="cllbi74yl000jimoz0rrsc8rd" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="clledmw2w000ki5oc09y53k14" class="article-share-link">Share</a>
       
       
     </footer>
@@ -484,7 +539,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" data-id="cllbi74y7000aimozghm07bf3" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" data-id="clledmw2o000ai5oc433ogwyy" class="article-share-link">Share</a>
       
       
     </footer>
@@ -534,64 +589,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/10/06/%E8%AF%BB%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%80%9A%E5%8F%B2/" data-id="cllbi74yk000iimozfjbhadsf" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-So-good-they-can-t-ignore-you" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/09/29/So-good-they-can-t-ignore-you/" class="article-date">
-  <time datetime="2015-09-29T15:07:02.000Z" itemprop="datePublished">2015-09-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/29/So-good-they-can-t-ignore-you/">So good they can&#39;t ignore you</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>”So good they can’t ignore you“是Cal NewPort的一本书。</p>
-<p>这本书提出了一个观点：”跟随激情是错误的“。</p>
-<p>当下很多书籍教导读者：”你要跟随激情，去做自己想做的事情。跟随激情，才能成功“。一些名人也有类似的言论，比如Steve Jobs 2005年在斯坦福的演讲中说到：</p>
-<blockquote>
-<p>You’ve got to find what you love… The only way to do great work is to love what you do. If you haven’t found it yet, keep looking, and don’t settle.</p>
-</blockquote>
-<p>信奉这种”激情思维“的人认为首先要做的事就是寻找一份符合自己激情的工作，以后一切就水到渠成了。结果他们却总是在换工作，总是对自己的工作不满意。他们始终不能找到自己的激情。有的人甚至认为，在没有找到让自己有激情的工作前，每一天都是浪费时间，于是变的沮丧。</p>
-<p>2010年的一项调查显示，64%的美国年轻人对自己的工作不满意。作者认为这和”激情思维“有关系。</p>
-<p>这本书的作者提出了相反的观点：”跟随激情是错误的“。一份有激情的工作并不是仅仅你觉得你会有激情就够了。为了获得有激情的工作，我们应该采用”工匠思维“。”工匠思维“就是”优秀的不可被忽视“。</p>
-<p>”激情思维的缺陷在于：“有”激情思维“的人总是思考世界能提供给我什么才能让我感受到激情，而有”工匠思维“的人则思考我能给世界提供什么。另外，自己喜欢什么？自己的激情是什么？这些问题是很难清楚地回答的。</p>
-<p>一份能激励人的工作有三个特点：</p>
-<ol>
-<li>能控制做什么，怎么做</li>
-<li>自己做的很好，有竞争力</li>
-<li>自己的工作和他人有联系</li>
-</ol>
-<p>这样的工作通常都是稀有的，获取这样的工作需要用其他有价值的东西来换，作者把这些有价值的东西叫做”职业资本“。而获取”职业资本“的方式就是采取”工匠思维“，努力做好自己的工作，”优秀的不可被忽视“。</p>
-<p>这本书的后半部分，作者讲了如何获取”职业资本“及如何用”职业资本“换取有激情的工作。</p>
-<p>这本书的一些例子有些牵强，不能很好地支持作者的观点，文笔也不怎么好。不过总体来说，这本书还是值得读的，尤其是对于那些觉得当前的不如意都是因为自己没有做自己喜欢的事情的人。喜欢，热爱，激情并不是毫无原因的，没有什么工作是你天生就喜欢的，这样的工作需要努力争取。</p>
-<p>那么是不是自己能做好的工作一定能让自己感受到激情呢？不是也有大红大紫的演员也会厌倦演戏吗？乔丹不是也离开篮球场去打棒球了吗？</p>
-<p>如果我们打篮球能像乔丹一样优秀，不能打好棒球估计也只能是人生的不完美了，还有什么可抱怨的呢！</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/09/29/So-good-they-can-t-ignore-you/" data-id="cllbi74xy0006imoz0d4dd3z8" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2015/10/06/%E8%AF%BB%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%80%9A%E5%8F%B2/" data-id="clledmw2v000ji5ocb90q0s7j" class="article-share-link">Share</a>
       
       
     </footer>
@@ -637,6 +635,10 @@
       <ul>
         
           <li>
+            <a href="/2023/08/17/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-17/">浏览记录2023-08-17</a>
+          </li>
+        
+          <li>
             <a href="/2023/08/15/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%95-2023-08-15/">浏览记录-2023-08-15</a>
           </li>
         
@@ -650,10 +652,6 @@
         
           <li>
             <a href="/2023/03/09/linux-namespace/">linux namespace</a>
-          </li>
-        
-          <li>
-            <a href="/2019/06/20/Node-js-mysqljs-mysql-package/">Node.js mysqljs/mysql package</a>
           </li>
         
       </ul>
