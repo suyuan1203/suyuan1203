@@ -63,6 +63,78 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Node-js简单Promise实现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/" class="article-date">
+  <time datetime="2019-06-07T15:17:58.000Z" itemprop="datePublished">2019-06-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/">Node.js简单Promise实现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Node.js最常见的callback形式的异步调用API是这个样子的，我们调用fs.readFile，然后在回调函数中分别调用onSuccess和onFail。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function onSuccess (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function onFail (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fs.readFile(&#x27;./myPromise.js&#x27;, (err, data) =&gt; &#123;</span><br><span class="line">  if (err) &#123;</span><br><span class="line">    onFail(err);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    onSuccess(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>我们也可以这么写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">const p = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">p.resolve = function (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">p.reject = function (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">fs.readFile(&#x27;./myPromise.js&#x27;, (err, data) =&gt; &#123;</span><br><span class="line">  if (err) &#123;</span><br><span class="line">    p.reject(err);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    p.resolve(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>和上面代码的区别是，我们把onSuccess和onFail封装到了一个Object中，分别叫resolve和reject，我们先不讨论这么写的好处。</p>
+<p>然后我们发现其实设置p.resolve和p.reject其实可以在fs.readFile之后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">const p = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">fs.readFile(&#x27;./myPromise.js&#x27;, (err, data) =&gt; &#123;</span><br><span class="line">  if (err) &#123;</span><br><span class="line">    p.reject(err);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    p.resolve(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">p.resolve = function (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">p.reject = function (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这其实是异步编程的一种特性，而不仅仅是Node.js的特性，用伪代码表示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">声明一个对象A</span><br><span class="line">开始一个异步操作</span><br><span class="line">修改对象A的成员</span><br></pre></td></tr></table></figure>
+
+<p>这里的问题是，异步操作完成以后如何访问修改后的A的成员？在Node.js中，我们可以利用closure来实现。上面的例子中，回调函数内部可以引用到p对象。</p>
+<p>更进一步，我们发现，把p对象封装在一个函数中返回，然后设置函数返回的对象的resolve和reject也是可以行的，原因同上。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./myPromise.js&#x27;);</span><br><span class="line"></span><br><span class="line">p.resolve = function (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">p.reject = function (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>我们现在添加一个MyPromise类来替换p，方便我们扩展p这个对象</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function MyPromise () &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.then = function (resolve, reject) &#123;</span><br><span class="line">  this.resolve = resolve;</span><br><span class="line">  this.reject = reject;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = new MyPromise();</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./myPromise.js&#x27;);</span><br><span class="line"></span><br><span class="line">function resolve (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">p.then(resolve, reject);</span><br></pre></td></tr></table></figure>
+
+<p>我们知道Promise被用来避免多层的callback嵌套，例如下面的代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function MyPromise () &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.then = function (resolve, reject) &#123;</span><br><span class="line">  this.resolve = resolve;</span><br><span class="line">  this.reject = reject;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = new MyPromise();</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./myPromise.js&#x27;);</span><br><span class="line"></span><br><span class="line">function resolve (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">  let p2 = readFile(&#x27;./myPromise2.js&#x27;); // 这里嵌套了一层readFile</span><br><span class="line">  function resolve2 (data) &#123;</span><br><span class="line">    console.log(data);</span><br><span class="line">  &#125;</span><br><span class="line">  function reject2 (err) &#123;</span><br><span class="line">    console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">  &#125;</span><br><span class="line">  p2.then(resolve2, reject2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">p.then(resolve, reject);</span><br></pre></td></tr></table></figure>
+
+<p>p2也是一个MyPromise对象，那么也许可以把p2返回到最外层，然后在最外层调用then。这需要调整MyPromise的内部实现。思路是then方法会返回一个MyPromise对象，我们把这个对象保存在MyPromise的next属性。我们添加了MyPromise.prototype.resolve方法，这个方法调用了this._resolve，而this._resolve会返回一个MyPromise对象，在MyPromise.prototype.resolve方法中，我们调用this._resolve返回的MyPromise对象的then方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function MyPromise () &#123;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.then = function (resolve, reject) &#123;</span><br><span class="line">  this._resolve = resolve;</span><br><span class="line">  this._reject = reject;</span><br><span class="line">  this.next = new MyPromise();</span><br><span class="line">  return this.next;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.resolve = function (data) &#123;</span><br><span class="line">  let p = this._resolve(data);</span><br><span class="line">  if (p) p.then(this.next._resolve, this.next._reject);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.reject = function (err) &#123;</span><br><span class="line">  this._reject(err);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = new MyPromise();</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, &#123;encoding: &#x27;utf-8&#x27;&#125;, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./a.txt&#x27;);</span><br><span class="line"></span><br><span class="line">function resolve (data) &#123;</span><br><span class="line">  console.log(&#x27;a.txt&#x27;, data);</span><br><span class="line">  let p2 = readFile(&#x27;./b.txt&#x27;);</span><br><span class="line">  return p2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function resolve2 (data) &#123;</span><br><span class="line">  console.log(&#x27;b.txt&#x27;, data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject2 (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">p</span><br><span class="line">.then(resolve, reject)</span><br><span class="line">.then(resolve2, reject2);</span><br></pre></td></tr></table></figure>
+
+<p>和上一段代码的最大区别是，不需要在resolve函数中嵌套，p2的resolve和reject函数了。</p>
+<p>上面的代码可以写成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">let p = readFile(&#x27;./a.txt&#x27;);</span><br><span class="line"></span><br><span class="line">p</span><br><span class="line">.then(function resolve (data) &#123;</span><br><span class="line">  console.log(&#x27;a.txt&#x27;, data);</span><br><span class="line">  let p2 = readFile(&#x27;./b.txt&#x27;);</span><br><span class="line">  return p2;</span><br><span class="line">&#125;, function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;)</span><br><span class="line">.then(function resolve2 (data) &#123;</span><br><span class="line">  console.log(&#x27;b.txt&#x27;, data);</span><br><span class="line">&#125;, function reject2 (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>如果忽略reject函数，那么这段代码已经很像调用Promise对象的代码。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">readFile(&#x27;./a.txt&#x27;);</span><br><span class="line">.then(function resolve (data) &#123;</span><br><span class="line">  console.log(&#x27;a.txt&#x27;, data);</span><br><span class="line">  let p2 = readFile(&#x27;./b.txt&#x27;);</span><br><span class="line">  return p2;</span><br><span class="line">&#125;)</span><br><span class="line">.then(function resolve2 (data) &#123;</span><br><span class="line">  console.log(&#x27;b.txt&#x27;, data);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这样的代码给人一种顺序调用readFile的感觉，饶了一大圈，我们仅仅是为了把嵌套的代码变成顺序的形式。</p>
+<p>这里仅仅实现了嵌套的异步操作看起来像顺序操作，和Promise对象功能还差很多，完整的Promise实现的规范是<a target="_blank" rel="noopener" href="https://promisesaplus.com/">Promises/A+</a></p>
+<p>Promise其实是一种设计模式，就像面向对象编程带来的一堆设计模式一样，在异步编程领域，Promise被大量使用。</p>
+<p>如果看一下Promise规范的话，单单一个then函数的实现就有十几条规则，编程的时候总是要考虑这些规则可不是个好的体验，如果你不注意的话，它就会跳出说”Surprise!”。但愿你的客户不会被”Surprise”。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.suyuan.me/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/" data-id="cllk8q4mz0004ijop713d8zms" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-70岁后工作" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/" class="article-date">
@@ -91,7 +163,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/" data-id="cllirw7ls0000kzoxbre29xu7" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/" data-id="cllk8q4mq0000ijop4ovf2gol" class="article-share-link">Share</a>
       
       
     </footer>
@@ -146,7 +218,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" data-id="cllirw7m30005kzoxbxf6190g" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" data-id="cllk8q4mz0005ijop5vtx4l7c" class="article-share-link">Share</a>
       
       
     </footer>
@@ -217,7 +289,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" data-id="cllirw7m10003kzoxe7hwafcp" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" data-id="cllk8q4my0003ijopb407emr6" class="article-share-link">Share</a>
       
       
     </footer>
@@ -288,7 +360,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="cllirw7mf000hkzox0q1ih5us" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="cllk8q4nc000iijop7zt45659" class="article-share-link">Share</a>
       
       
     </footer>
@@ -329,7 +401,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="cllirw7mi000lkzox7cdj4png" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="cllk8q4nf000nijop42b55u3v" class="article-share-link">Share</a>
       
       
     </footer>
@@ -373,7 +445,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="cllirw7mk000okzox4xv2f3he" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="cllk8q4ni000rijop2yzt09w0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -419,7 +491,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="cllirw7mh000jkzox21m8f2v5" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="cllk8q4nf000mijop07a63dfy" class="article-share-link">Share</a>
       
       
     </footer>
@@ -479,7 +551,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="cllirw7mg000ikzox64p0as3n" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="cllk8q4nd000jijop3g9i1jb2" class="article-share-link">Share</a>
       
       
     </footer>
@@ -531,53 +603,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="cllirw7mj000nkzoxbngv24u9" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-做自己喜欢的事情" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" class="article-date">
-  <time datetime="2015-12-20T15:09:10.000Z" itemprop="datePublished">2015-12-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/">做自己喜欢的事情</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近看完了”The Martian“。最大的感受是”要做自己喜欢的事情“，即使不成功，也享受到了生活。</p>
-<p>The Martian的作者是个程序员，业余爱好科幻小说和星际冒险。他出于兴趣在自己网站上一篇一篇发表了The Martian，没想到这部小说火了起来。他亲自计算了小说中飞船飞行轨道，小说中的很多细节来源于他对科学和太空的喜爱，可以说，他对科学和太空的热爱成就了这部小说。</p>
-<p>几个月前，我读了”So good they can’t ignore you“。这本书反对在选择职业的时候跟随激情。</p>
-<p>“跟随激情”和“做自己喜欢的事”其实是一样的。今天我又思考了一下，是否应该做自己喜欢的事情。</p>
-<p>做自己喜欢的事不仅仅与工作有关，还与人生有关。得到自己不想要的东西真的很浪费，因此要做自己喜欢做的事。</p>
-<p>现实点说，为了生存很多人都不能选择自己从事的工作，因此做自己喜欢的事是勇敢的。</p>
-<p>做自己喜欢的事情不代表你会失败，同样也不代表你会成功。为了成功，你需要做到非常好。</p>
-<p>“自己喜欢的事”具有那些你根本意识不到的吸引力，你做这些事的时候不会希望它结束，你沉浸其中，结果不那么重要。</p>
-<p>So good中提到一种观点，那些想着“做自己喜欢的事”的人是自私的，是从世界索取，希望世界符合自己的要求。我认为这样的说法是错误的。喜欢做一件事情是幸运的，这不是一种索求，而是探险中的一种发现，是世界对我们的恩赐。</p>
-<p>So good中的另一个观点是很有价值的，就是“So good they can’t ignore you”。我们要做自己喜欢的事情，而且要做的非常好。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2015/12/20/%E5%81%9A%E8%87%AA%E5%B7%B1%E5%96%9C%E6%AC%A2%E7%9A%84%E4%BA%8B%E6%83%85/" data-id="cllirw7m7000akzoxfh8jcr9i" class="article-share-link">Share</a>
+      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="cllk8q4nh000qijopho86gwv9" class="article-share-link">Share</a>
       
       
     </footer>
@@ -637,6 +663,10 @@
       <ul>
         
           <li>
+            <a href="/2023/08/21/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-21/">浏览记录2023-08-21</a>
+          </li>
+        
+          <li>
             <a href="/2023/08/20/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-20/">浏览记录2023-08-20</a>
           </li>
         
@@ -650,10 +680,6 @@
         
           <li>
             <a href="/2023/08/12/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-12/">浏览记录2023-08-12</a>
-          </li>
-        
-          <li>
-            <a href="/2023/04/29/%E7%BB%95%E8%BF%87new-bing%E9%99%90%E5%88%B6/">绕过new bing限制</a>
           </li>
         
       </ul>
