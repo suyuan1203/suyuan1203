@@ -9,7 +9,7 @@ tags:
 
 当下很多书籍教导读者：”你要跟随激情，去做自己想做的事情。跟随激情，才能成功“。一些名人也有类似的言论，比如Steve Jobs 2005年在斯坦福的演讲中说到：
 
-> You've got to find what you love... The only way to do great work is to love what you do. If you haven't found it yet, keep looking, and don't settle.
+*You've got to find what you love... The only way to do great work is to love what you do. If you haven't found it yet, keep looking, and don't settle.*
 
 信奉这种”激情思维“的人认为首先要做的事就是寻找一份符合自己激情的工作，以后一切就水到渠成了。结果他们却总是在换工作，总是对自己的工作不满意。他们始终不能找到自己的激情。有的人甚至认为，在没有找到让自己有激情的工作前，每一天都是浪费时间，于是变的沮丧。
 
