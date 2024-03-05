@@ -5,17 +5,17 @@
   
 
   
-  <title>Su Yuan</title>
+  <title>SuYuan&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta property="og:type" content="website">
-<meta property="og:title" content="Su Yuan">
+<meta property="og:title" content="SuYuan&#39;s Blog">
 <meta property="og:url" content="https://blog.suyuan.me/page/2/index.html">
-<meta property="og:site_name" content="Su Yuan">
+<meta property="og:site_name" content="SuYuan&#39;s Blog">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="Su Yuan">
 <meta name="twitter:card" content="summary">
   
-    <link rel="alternate" href="/atom.xml" title="Su Yuan" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="SuYuan&#39;s Blog" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -32,597 +32,43 @@
   <div id="container">
     <div id="wrap">
       <header id="header">
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">Su Yuan</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://blog.suyuan.me"></form>
-      </div>
-    </div>
-  </div>
+  <a href="/" id="logo">SuYuan&#39;s Blog</a>
 </header>
       <div class="outer">
         <section id="main">
   
-    <article id="post-Node-js简单Promise实现" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/" class="article-date">
-  <time datetime="2019-06-07T15:17:58.000Z" itemprop="datePublished">2019-06-07</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+    <div class="articleListItem"><a href="/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/">Node.js简单Promise实现</a><span class="articleDate">2019-06-07</span></div>
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/">Node.js简单Promise实现</a>
-    </h1>
+    <div class="articleListItem"><a href="/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/">70岁后工作</a><span class="articleDate">2019-06-05</span></div>
   
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Node.js最常见的callback形式的异步调用API是这个样子的，我们调用fs.readFile，然后在回调函数中分别调用onSuccess和onFail。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function onSuccess (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function onFail (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fs.readFile(&#x27;./myPromise.js&#x27;, (err, data) =&gt; &#123;</span><br><span class="line">  if (err) &#123;</span><br><span class="line">    onFail(err);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    onSuccess(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>我们也可以这么写</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">const p = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">p.resolve = function (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">p.reject = function (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">fs.readFile(&#x27;./myPromise.js&#x27;, (err, data) =&gt; &#123;</span><br><span class="line">  if (err) &#123;</span><br><span class="line">    p.reject(err);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    p.resolve(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>和上面代码的区别是，我们把onSuccess和onFail封装到了一个Object中，分别叫resolve和reject，我们先不讨论这么写的好处。</p>
-<p>然后我们发现其实设置p.resolve和p.reject其实可以在fs.readFile之后</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">const p = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">fs.readFile(&#x27;./myPromise.js&#x27;, (err, data) =&gt; &#123;</span><br><span class="line">  if (err) &#123;</span><br><span class="line">    p.reject(err);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    p.resolve(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">p.resolve = function (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">p.reject = function (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>这其实是异步编程的一种特性，而不仅仅是Node.js的特性，用伪代码表示</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">声明一个对象A</span><br><span class="line">开始一个异步操作</span><br><span class="line">修改对象A的成员</span><br></pre></td></tr></table></figure>
-
-<p>这里的问题是，异步操作完成以后如何访问修改后的A的成员？在Node.js中，我们可以利用closure来实现。上面的例子中，回调函数内部可以引用到p对象。</p>
-<p>更进一步，我们发现，把p对象封装在一个函数中返回，然后设置函数返回的对象的resolve和reject也是可以行的，原因同上。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./myPromise.js&#x27;);</span><br><span class="line"></span><br><span class="line">p.resolve = function (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">p.reject = function (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>我们现在添加一个MyPromise类来替换p，方便我们扩展p这个对象</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function MyPromise () &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.then = function (resolve, reject) &#123;</span><br><span class="line">  this.resolve = resolve;</span><br><span class="line">  this.reject = reject;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = new MyPromise();</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./myPromise.js&#x27;);</span><br><span class="line"></span><br><span class="line">function resolve (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">p.then(resolve, reject);</span><br></pre></td></tr></table></figure>
-
-<p>我们知道Promise被用来避免多层的callback嵌套，例如下面的代码</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function MyPromise () &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.then = function (resolve, reject) &#123;</span><br><span class="line">  this.resolve = resolve;</span><br><span class="line">  this.reject = reject;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = new MyPromise();</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./myPromise.js&#x27;);</span><br><span class="line"></span><br><span class="line">function resolve (data) &#123;</span><br><span class="line">  console.log(data);</span><br><span class="line">  let p2 = readFile(&#x27;./myPromise2.js&#x27;); // 这里嵌套了一层readFile</span><br><span class="line">  function resolve2 (data) &#123;</span><br><span class="line">    console.log(data);</span><br><span class="line">  &#125;</span><br><span class="line">  function reject2 (err) &#123;</span><br><span class="line">    console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">  &#125;</span><br><span class="line">  p2.then(resolve2, reject2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">p.then(resolve, reject);</span><br></pre></td></tr></table></figure>
-
-<p>p2也是一个MyPromise对象，那么也许可以把p2返回到最外层，然后在最外层调用then。这需要调整MyPromise的内部实现。思路是then方法会返回一个MyPromise对象，我们把这个对象保存在MyPromise的next属性。我们添加了MyPromise.prototype.resolve方法，这个方法调用了this._resolve，而this._resolve会返回一个MyPromise对象，在MyPromise.prototype.resolve方法中，我们调用this._resolve返回的MyPromise对象的then方法。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">const fs = require(&#x27;fs&#x27;);</span><br><span class="line"></span><br><span class="line">function MyPromise () &#123;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.then = function (resolve, reject) &#123;</span><br><span class="line">  this._resolve = resolve;</span><br><span class="line">  this._reject = reject;</span><br><span class="line">  this.next = new MyPromise();</span><br><span class="line">  return this.next;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.resolve = function (data) &#123;</span><br><span class="line">  let p = this._resolve(data);</span><br><span class="line">  if (p) p.then(this.next._resolve, this.next._reject);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">MyPromise.prototype.reject = function (err) &#123;</span><br><span class="line">  this._reject(err);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">function readFile (filePath) &#123;</span><br><span class="line">  const p = new MyPromise();</span><br><span class="line"></span><br><span class="line">  function cb (err, data) &#123;</span><br><span class="line">    if (err) &#123;</span><br><span class="line">      p.reject(err);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      p.resolve(data);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  fs.readFile(filePath, &#123;encoding: &#x27;utf-8&#x27;&#125;, cb);</span><br><span class="line"></span><br><span class="line">  return p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let p = readFile(&#x27;./a.txt&#x27;);</span><br><span class="line"></span><br><span class="line">function resolve (data) &#123;</span><br><span class="line">  console.log(&#x27;a.txt&#x27;, data);</span><br><span class="line">  let p2 = readFile(&#x27;./b.txt&#x27;);</span><br><span class="line">  return p2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function resolve2 (data) &#123;</span><br><span class="line">  console.log(&#x27;b.txt&#x27;, data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function reject2 (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">p</span><br><span class="line">.then(resolve, reject)</span><br><span class="line">.then(resolve2, reject2);</span><br></pre></td></tr></table></figure>
-
-<p>和上一段代码的最大区别是，不需要在resolve函数中嵌套，p2的resolve和reject函数了。</p>
-<p>上面的代码可以写成</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">let p = readFile(&#x27;./a.txt&#x27;);</span><br><span class="line"></span><br><span class="line">p</span><br><span class="line">.then(function resolve (data) &#123;</span><br><span class="line">  console.log(&#x27;a.txt&#x27;, data);</span><br><span class="line">  let p2 = readFile(&#x27;./b.txt&#x27;);</span><br><span class="line">  return p2;</span><br><span class="line">&#125;, function reject (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;)</span><br><span class="line">.then(function resolve2 (data) &#123;</span><br><span class="line">  console.log(&#x27;b.txt&#x27;, data);</span><br><span class="line">&#125;, function reject2 (err) &#123;</span><br><span class="line">  console.log(&#x27;Error: &#x27;, err);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>如果忽略reject函数，那么这段代码已经很像调用Promise对象的代码。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">readFile(&#x27;./a.txt&#x27;);</span><br><span class="line">.then(function resolve (data) &#123;</span><br><span class="line">  console.log(&#x27;a.txt&#x27;, data);</span><br><span class="line">  let p2 = readFile(&#x27;./b.txt&#x27;);</span><br><span class="line">  return p2;</span><br><span class="line">&#125;)</span><br><span class="line">.then(function resolve2 (data) &#123;</span><br><span class="line">  console.log(&#x27;b.txt&#x27;, data);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>这样的代码给人一种顺序调用readFile的感觉，饶了一大圈，我们仅仅是为了把嵌套的代码变成顺序的形式。</p>
-<p>这里仅仅实现了嵌套的异步操作看起来像顺序操作，和Promise对象功能还差很多，完整的Promise实现的规范是<a target="_blank" rel="noopener" href="https://promisesaplus.com/">Promises/A+</a></p>
-<p>Promise其实是一种设计模式，就像面向对象编程带来的一堆设计模式一样，在异步编程领域，Promise被大量使用。</p>
-<p>如果看一下Promise规范的话，单单一个then函数的实现就有十几条规则，编程的时候总是要考虑这些规则可不是个好的体验，如果你不注意的话，它就会跳出说”Surprise!”。但愿你的客户不会被”Surprise”。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/06/07/Node-js%E7%AE%80%E5%8D%95Promise%E5%AE%9E%E7%8E%B0/" data-id="cllk8q4mz0004ijop713d8zms" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
+    <div class="articleListItem"><a href="/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/">Redis信号量</a><span class="articleDate">2019-05-30</span></div>
   
-</article>
-
-
+    <div class="articleListItem"><a href="/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">Node.js实现内网穿透</a><span class="articleDate">2019-05-25</span></div>
   
-    <article id="post-70岁后工作" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/" class="article-date">
-  <time datetime="2019-06-05T15:16:52.000Z" itemprop="datePublished">2019-06-05</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+    <div class="articleListItem"><a href="/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/">统计语言模型和隐马尔科夫模型</a><span class="articleDate">2019-05-22</span></div>
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/">70岁后工作</a>
-    </h1>
+    <div class="articleListItem"><a href="/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/">读巴黎圣母院</a><span class="articleDate">2019-05-03</span></div>
   
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>推荐一部电影 实习生 The Intern，很温暖的电影。</p>
-<p>希望我70岁的时候还在工作，而且我工作不是为了钱。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/06/05/70%E5%B2%81%E5%90%8E%E5%B7%A5%E4%BD%9C/" data-id="cllk8q4mq0000ijop4ovf2gol" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
+    <div class="articleListItem"><a href="/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/">读谈判力</a><span class="articleDate">2019-03-02</span></div>
   
-</article>
-
-
+    <div class="articleListItem"><a href="/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/">读人生的智慧</a><span class="articleDate">2019-01-29</span></div>
   
-    <article id="post-Redis信号量" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" class="article-date">
-  <time datetime="2019-05-30T15:16:10.000Z" itemprop="datePublished">2019-05-30</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+    <div class="articleListItem"><a href="/2019/01/17/%E8%AF%BBDrive/">读Drive</a><span class="articleDate">2019-01-17</span></div>
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/">Redis信号量</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>信号量可以只使用一个数字来实现，但是这样的信号量没有timeout，如果获得信号量的client出错退出了，那么这个信号量就得不到释放，我们可以利用zset来实现一个支持timeout的信号量。</p>
-<p>思路是每次获取信号量的时候，生成一个id，然后把id添加到zset中，value设置为当前的时戳。然后检查id在zset中的rank，如果超过信号量数量limit，那么获取信号量失败，否则获取信号量成功，返回id。</p>
-<p>client.js</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">async function acquireSemaphore(name, limit = 5, timeout = 10000) &#123;</span><br><span class="line">  const id = uuidv4(); // 生成一个id</span><br><span class="line">  const now = new Date().getTime(); // 当前的时戳</span><br><span class="line"></span><br><span class="line">  const pipeline = redis.pipeline();</span><br><span class="line">  await pipeline.zremrangebyscore(name, &#x27;-inf&#x27;, now - timeout); // 删除已经超时的信号量</span><br><span class="line">  await pipeline.zadd(name, now, id); </span><br><span class="line">  await pipeline.zrank(name, id);</span><br><span class="line">  const results = await pipeline.exec();</span><br><span class="line">  // 如果新添加的数据的rank没有超过limit，那么获取信号量成功</span><br><span class="line">  if (results[results.length - 1][1] &lt; limit) &#123;</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line">  redis.zrem(name, id); // 如果获取信号量失败，那么把id从zset中删除</span><br><span class="line">  return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面的代码依赖于多个client的时间是同步的，假设有两个client A和B，B的时间落后A 10ms。A和B都尝试获取最后一个信号量，A先获取成功。A在zset中添加了最后一项。<br>zset</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5ff  1559220791205</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f1  1559220791206</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f2  1559220791207</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f3  1559220791208</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791249</span><br></pre></td></tr></table></figure>
-
-<p>接着B尝试获取信号量，因为B的时间比A落后，B写入的值是1559220791239，落后A 10ms。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791239</span><br></pre></td></tr></table></figure>
-
-<p>zset会根据value排序，结果是</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5ff  1559220791205</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f1  1559220791206</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f2  1559220791207</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f3  1559220791208</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791239</span><br><span class="line">1804e2d0-0272-4bf8-97a5-2e30c195b5f4  1559220791249</span><br></pre></td></tr></table></figure>
-
-<p>这样相当于B插入在了A的前面。这样B在zset中的rank是4，没有超过信号量的限制。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">await pipeline.zrank(name, id);</span><br></pre></td></tr></table></figure>
-
-<p>这样A和B同时获得了信号量，超过了信号量的限制，这不是我们想要的结果。</p>
-<p>如果在zset中保存时戳，会有不同机器的时间不同步的问题。如果在zset中存储一个递增的id，这样不同的client在zset中的排序就不会受机器时戳的影响了。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">async function acquireSemaphore(name, limit = 5, timeout = 10000) &#123;</span><br><span class="line">  const id = uuidv4();</span><br><span class="line">  const now = new Date().getTime();</span><br><span class="line">  const timeKey = name + &#x27;:time&#x27;;</span><br><span class="line">  const countKey = name + &#x27;:count&#x27;; // 这里增加了一个递增的id</span><br><span class="line"></span><br><span class="line">  let pipeline = redis.pipeline();</span><br><span class="line">  await pipeline.zremrangebyscore(timeKey, &#x27;-inf&#x27;, now - timeout);</span><br><span class="line">  await pipeline.zinterstore(</span><br><span class="line">    countKey, </span><br><span class="line">    2, </span><br><span class="line">    countKey,</span><br><span class="line">    timeKey, </span><br><span class="line">    &#x27;weights&#x27;,</span><br><span class="line">    1,</span><br><span class="line">    0</span><br><span class="line">  ); // 求timeKey和countKey的交集，过滤掉timeout的信号量</span><br><span class="line"></span><br><span class="line">  await pipeline.incr(&#x27;semaphore:count&#x27;);</span><br><span class="line">  let results = await pipeline.exec();</span><br><span class="line">  const count = results[results.length-1][1];</span><br><span class="line"></span><br><span class="line">  pipeline = redis.pipeline();</span><br><span class="line">  await pipeline.zadd(timeKey, now, id);</span><br><span class="line">  await pipeline.zadd(countKey, count, id);</span><br><span class="line">  await pipeline.zrank(countKey, id); // 后获取信号量的client的rank更高</span><br><span class="line"></span><br><span class="line">  let results2 = await pipeline.exec();</span><br><span class="line">  if (results2[results2.length - 1][1] &lt; limit) &#123;</span><br><span class="line">    return id;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  redis.zrem(timeKey, id);</span><br><span class="line">  redis.zrem(countKey, id);</span><br><span class="line">  return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/30/Redis%E4%BF%A1%E5%8F%B7%E9%87%8F/" data-id="cllk8q4mz0005ijop5vtx4l7c" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Node-js实现内网穿透" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" class="article-date">
-  <time datetime="2019-05-25T15:15:17.000Z" itemprop="datePublished">2019-05-25</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">Node.js实现内网穿透</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>如何在办公室外调用办公室内一台服务器上部署的服务？</p>
-<p>如果办公室有固定的IP地址，而且可以映射到内网的机器，那么这个问题很简单。如果无法通过这种方式访问内网的机器，我们还可以通过内网穿透的办法来解决。</p>
-<p>基本的思路是，需要有一台公网的服务器，服务器上运行一个程序，这个程序监听两个端口，分别供外部客户端和内网客户端连接，然后这个程序负责转发双方的通信给对方。</p>
-<p><img src="https://wx3.sinaimg.cn/mw690/66ae68a1ly1g3cj95381qj20oc0gsjsj.jpg"></p>
-<p>server.js</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket;</span><br><span class="line">const inServer = net.createServer(function(socket) &#123;</span><br><span class="line">  inSocket = socket;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer = net.createServer(function(socket) &#123;</span><br><span class="line">  outSocket = socket;</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
-
-<p>in_client.js 内网的客户端</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">const socket = net.connect(&#123; port: 4001 &#125;, () =&gt; &#123;</span><br><span class="line">  </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;data&#x27;, (data) =&gt; &#123;</span><br><span class="line">  console.log(data.toString());</span><br><span class="line">  socket.write(&#x27;Data from in office&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;end&#x27;, () =&gt; &#123;</span><br><span class="line">  console.log(&#x27;on end&#x27;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>out_client.js 外网的客户端</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">const socket = net.connect(&#123; port: 4002 &#125;, () =&gt; &#123;</span><br><span class="line">  socket.write(&#x27;Data from outside&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;data&#x27;, (data) =&gt; &#123;</span><br><span class="line">  console.log(data.toString());</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(&#x27;end&#x27;, () =&gt; &#123;</span><br><span class="line">  console.log(&#x27;on end&#x27;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>先运行server.js，然后运行in_client.js，再运行out_client.js</p>
-<p>然后我们可以看到in_client.js和out_client.js互相可以通过server.js通信</p>
-<p>这里in_client.js需要先运行，然后再运行out_client.js。类似于我们需要先在内网机器上运行teamviewer，然后再在外部运行teamviewer。</p>
-<p>然后我们就可以扩展in_client和out_client的功能，例如当out_client发送特定的命令时，in_client就传输本地的屏幕和键盘事件给对方，这样就能实现类似teamviewer的远程桌面。</p>
-<p>回到我们开始的问题，如果内网机器上部署了一个service，如何通过out_client访问到呢？</p>
-<p>我们可以在in_client启动时就连接要请求的服务，然后等待外部的访问</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let serviceSocket, socket;</span><br><span class="line"></span><br><span class="line">socket = net.connect(&#123; port: 4001 &#125;); // 连接公网服务器</span><br><span class="line"></span><br><span class="line">serviceSocket = net.connect(&#123; port: 8080 &#125;); // 假设在http://localhost:8080有一个服务</span><br><span class="line"></span><br><span class="line">socket.pipe(serviceSocket);  // 从服务器转发过来的数据都会发送给service</span><br><span class="line">serviceSocket.pipe(socket); // service返回的数据都会转发给socket，进而转发到服务器</span><br></pre></td></tr></table></figure>
-
-<p>server.js</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket;</span><br><span class="line">const inServer = net.createServer(function(socket) &#123;</span><br><span class="line">  inSocket = socket;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer = net.createServer(function(socket) &#123;</span><br><span class="line">  outSocket = socket;</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
-
-<p>这时我们访问<a href="http://localhost:4002，我们的请求就会被转发到http://localhost:8080">http://localhost:4002，我们的请求就会被转发到http://localhost:8080</a></p>
-<p>仍然有一个问题是，http请求完成以后，客户端过一段时间以后会把底层的TCP连接关掉，那么我们在server上建立的，inSocket和outSocket之间的pipe就断掉了。</p>
-<p>解决这个问题的思路是，在server上再添加一个listen的socket，这个socket专门用来和in_client通信，告诉in_client有新的连接请求，in_client发现有新的连接请求以后，再和server建立一个用于转发tcp的连接，这个连接可以在通信完就关闭掉。</p>
-<p>我们通过这个新建立的socket发送控制命令给in_client，告诉它有新的连接了，所以我们把这个socket叫controlSocket</p>
-<p>server.js</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let inSocket, outSocket, controlSocket;</span><br><span class="line"></span><br><span class="line">// 这里我们添加了controlServer</span><br><span class="line">const controlServer = net.createServer();</span><br><span class="line">controlServer.on(&#x27;connection&#x27;, (socket) =&gt; &#123;</span><br><span class="line">  controlSocket = socket;</span><br><span class="line">&#125;);</span><br><span class="line">controlServer.listen(4003);</span><br><span class="line"></span><br><span class="line">const inServer = net.createServer();</span><br><span class="line">inServer.on(&#x27;connection&#x27;, function(socket) &#123;</span><br><span class="line">  inSocket = socket;</span><br><span class="line">  // 这里我们先建立了外部的socket，然后才通过控制socket</span><br><span class="line">  // 告诉in_client建立内部的socket，所以把pipe的代码放在这里</span><br><span class="line">  if (inSocket &amp;&amp; outSocket) &#123;</span><br><span class="line">    inSocket.pipe(outSocket);</span><br><span class="line">    outSocket.pipe(inSocket);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line">inServer.listen(4001);</span><br><span class="line"></span><br><span class="line">const outServer = net.createServer();</span><br><span class="line">outServer.on(&#x27;connection&#x27;, function(socket) &#123;</span><br><span class="line">  outSocket = socket;</span><br><span class="line">  controlSocket.write(&#x27;new_conn_cmd&#x27;);</span><br><span class="line">&#125;);</span><br><span class="line">outServer.listen(4002);</span><br></pre></td></tr></table></figure>
-
-<p>in_client.js</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&#x27;net&#x27;);</span><br><span class="line"></span><br><span class="line">let serviceSocket, outSocket, controlSocket;</span><br><span class="line"></span><br><span class="line">controlSocket = net.connect(&#123; port: 4003 &#125;);</span><br><span class="line"></span><br><span class="line">controlSocket.on(&#x27;data&#x27;, (data) =&gt; &#123;</span><br><span class="line">  // 这里没有处理命令的长度</span><br><span class="line">  data = data.toString();</span><br><span class="line">  if (data === &#x27;new_conn_cmd&#x27;) &#123;</span><br><span class="line">    outSocket = net.connect(&#123; port: 4001 &#125;);</span><br><span class="line">    serviceSocket = net.connect(&#123; port: 8080 &#125;);</span><br><span class="line">    outSocket.pipe(serviceSocket);</span><br><span class="line">    serviceSocket.pipe(outSocket);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    console.log(&#x27;Invalid commadn&#x27;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>这时我们再请求<a target="_blank" rel="noopener" href="http://127.0.0.1:4002/%EF%BC%8C%E7%AD%89%E4%B8%80%E6%AE%B5%E6%97%B6%E9%97%B4%EF%BC%8C%E8%BF%9E%E6%8E%A5%E4%BC%9A%E8%A2%AB%E6%96%AD%E6%8E%89%EF%BC%8C%E4%B8%8B%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%97%B6%E5%80%99%E4%BC%9A%E5%BB%BA%E7%AB%8B%E6%96%B0%E7%9A%84%E8%BF%9E%E6%8E%A5%E3%80%82%E5%9B%A0%E4%B8%BAhttp%E5%8D%8F%E8%AE%AE%E4%BC%9A%E5%A4%8D%E7%94%A8%E5%BA%95%E5%B1%82%E7%9A%84%E8%BF%9E%E6%8E%A5%EF%BC%8C%E7%9F%AD%E6%97%B6%E9%97%B4%E5%86%85%E8%BF%9E%E7%BB%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E4%B8%8D%E4%BC%9A%E5%BB%BA%E7%AB%8B%E6%96%B0%E7%9A%84%E8%BF%9E%E6%8E%A5">http://127.0.0.1:4002/，等一段时间，连接会被断掉，下一次请求的时候会建立新的连接。因为http协议会复用底层的连接，短时间内连续的请求不会建立新的连接</a> 。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/25/Node-js%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" data-id="cllk8q4my0003ijopb407emr6" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-统计语言模型和隐马尔科夫模型" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" class="article-date">
-  <time datetime="2019-05-22T15:14:43.000Z" itemprop="datePublished">2019-05-22</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/">统计语言模型和隐马尔科夫模型</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>”数学之美”是一本科普书籍，作者吴军是语音识别，自然语言处理方面的专家。这本书讲了一些数学在语音识别，自然语言处理方面的应用。</p>
-<p>第三章和第五章分别讲了统计语言模型和隐含马尔可夫模型，很有意思，这篇文章做一下总结。</p>
-<p>语音识别要解决的问题是，我们拿到了一段语音，如何推测出原始的文本是什么。假设这段语音的内容是”你好“，那么我们希望根据语音能推测出原始文本是”你好“。</p>
-<p>我们把语音看做一个序列，o1, o2, o3, … , on，每个字母代表一个语音片段，原始文本看做另一个序列s1, s2, s3, … , sn。</p>
-<p>假设语音是汉语，那么我们s1, s2, s3 … sn是汉字的序列。一般的思路是，我们尝试找出一定的规则，在给定语音序列的时候，推测出文字序列。或者我们可以换一个思路。因为我们已知文字序列是汉字的序列，那么汉字组成的序列的数量是有限的，在给定语音序列的时候，我们计算出每个汉字序列出现的概率，概率最大的那个组合就是我们想要的汉字序列。</p>
-<p>例如给定语音序列o1, o2, o3, … , on，我们计算出P(”中国“) = 0.9, P(”你好“) = 0.6, 那么中国就更可能是语音对应的文本。</p>
-<p>也就是说我们无法100%根据语音推算出原始文本是什么，我们只能说，给定语音，我们认为原始文本是s1, s2, s3, …, sn的概率最大。也就是P(s1, s2, s3, … | o1, o2, o3, …)最大。那么如何计算P(s1, s2, s3, … | o1, o2, o3, …)呢？</p>
-<p>根据贝叶斯公式，</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(s1, s2, s3, ... | o1, o2, o3, ...) = P(o1, o2, o3, ... | s1, s2, s3, ...) P(s1, s2, s3, ...) / P(o1, o2, o3, ...)</span><br></pre></td></tr></table></figure>
-
-<p>因为o1, o2, o3是语音序列，这个序列一旦产生就不会再变了，因此P(o1, o2, o3, …)是一个可以忽略的常数，最大化P(s1, s2, s3, … | o1, o2, o3, …)，相当于最大化P(o1, o2, o3, … | s1, s2, s3, …) P(s1, s2, s3, …)。</p>
-<p>我们先来计算P(o1, o2, o3, … | s1, s2, s3, …)，按照条件概率</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(o1, o2, o3, ... | s1, s2, s3, ...) = P(o1|s1...)P(o2|o1,s1...)P(o3|o2,o1,s1...)...P(on|o(n-1)...o1,s1...)</span><br></pre></td></tr></table></figure>
-
-<p>这个概率计算还是比较复杂的，有一个简化的办法，我们假设o(t)仅仅和s(t)相关，这个假设叫做独立输出假设。这样一来上面的等式可以简化为:</p>
-<p>P(o1, o2, o3, … | s1, s2, s3, …) = P(o1|s1)P(o2|s2)P(o3|s3)…P(on|sn) =  ∏P(ot|st)</p>
-<p>我们用这个简化的概率来近似原来的概率。</p>
-<p>然后来看P(s1, s2, s3, …)，同样根据条件概率</p>
-<p>P(s1, s2, s3, …) = P(s1)P(s2|s1)P(s3|s1,s2)…P(sn|s1, s2, …)</p>
-<p>同样我们简化这个概率的计算，我们假设s(t)仅仅和s(t-1)相关，也就是说一个状态仅仅和前一个状态有关，这个假设叫做马尔科夫假设。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(s1, s2, s3, ...) = P(s1)P(s2|s1)P(s3|s2)...P(sn|s(n-1)) = ∏ P(s(t) | s(t-1))</span><br></pre></td></tr></table></figure>
-
-<p>现在我们来看如何计算∏P(ot|st)和∏ P(s(t) | s(t-1))。这两个值可以用人工标注的数据来估算。</p>
-<p>我们可以选择很多语音片段，然后人工标注对应的文本，也就是说我们准备了很多(s1, s2, …, sn)到(o1, o2, …, on)的对应关系。</p>
-<p>我们注意到 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(ot|st) = P(ot, st) / p(st)。</span><br></pre></td></tr></table></figure>
-
-<p>在标注数据中，我们统计ot和st同时出现的次数，N(ot, st)，把这个值除以整个标注数据的大小N，这里的N可以是所有标注数据的序列长度之和。那么根据大数定理，在有足够多的数据的情况下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">N(ot, st) / N ≃ P(ot, st) / p(st) 。</span><br></pre></td></tr></table></figure>
-
-<p>再来看P(s(t) | s(t-1))，同样因为P(s(t) | s(t-1)) = P(st, s(t-1)) / P(s(t-1))，而通过标注的数据，我们统计st和s(t-1)同时出现的次数N(st, s(t-1))，然后除以标注数据的大小N, 那么</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">N(st, s(t-1) / N ≃ P(st, s(t-1)) / P(s(t-1)) 。</span><br></pre></td></tr></table></figure>
-
-<p>也就是说，通过标注的数据，我们就可以计算出∏P(ot|st)和∏ P(s(t) | s(t-1))，而通过∏P(ot|st)和∏ P(s(t) | s(t-1))，我们可以计算出，在给定o1, o2, …, on序列的情况下，每种s1, s2, …, sn的概率，最大概率的那个序列就很可能是语音的原始文本。这样就实现了语音识别的功能。</p>
-<p>P(o1, o2, o3, … | s1, s2, s3, …)被称作声学模型，而P(ot|st)和P(s(t) | s(t-1))就是模型的参数，在给定标注数据的情况下，我们可以计算出模型的参数。而根据模型参数，给定o1, o2, …, o3序列，我们可以计算出每个s1, s2, …, sn序列的概率。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/22/%E7%BB%9F%E8%AE%A1%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9A%90%E9%A9%AC%E5%B0%94%E7%A7%91%E5%A4%AB%E6%A8%A1%E5%9E%8B/" data-id="cllk8q4nc000iijop7zt45659" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-读巴黎圣母院" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" class="article-date">
-  <time datetime="2019-05-03T15:14:02.000Z" itemprop="datePublished">2019-05-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/">读巴黎圣母院</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>刚看完还是对副主教同情不起来，尤其是最后他把姑娘交给隐修女的时候，先是威胁，威胁无效就要把姑娘毁掉，这种爱也太变态了。</p>
-<p>豆瓣上有不少喜欢副主教的。这个人学习勤奋，为人善良，收养卡西莫多，养育弟弟约翰。只是因为他所处的社会，他的职业，导致他的爱变的畸形。</p>
-<p>副主教这个人和他弟弟约翰是两个极端，一个恪守各种规则，一个放浪形骸。</p>
-<p>他这个人一向胸怀坦荡，在世间只遵循有益的自然法则，有什么激情都随意宣泄，心潮的湖泊始终流光，因为每天早晨都广泛开辟排泄感情的新沟渠，他哪里知道人的情涛欲海，如果堵塞泄口，就会汹涌澎湃，汇积暴涨，就会漫溢泛滥，就会冲毁心田，始发为内心的饮泣、无声的痉挛，终至冲垮堤坝，恣意横流。</p>
-<p>哎，克洛德，你就是蜘蛛。克洛德，你也是苍蝇。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/05/03/%E8%AF%BB%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2/" data-id="cllk8q4nf000nijop42b55u3v" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-读谈判力" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" class="article-date">
-  <time datetime="2019-03-02T15:13:34.000Z" itemprop="datePublished">2019-03-02</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/">读谈判力</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>一本教你如何谈判的书，有很多实用的原则，值得多次看看。</p>
-<h5 id="不要在立场上讨价还价"><a href="#不要在立场上讨价还价" class="headerlink" title="不要在立场上讨价还价"></a>不要在立场上讨价还价</h5><p>谈判的时候要着眼于利益而不是立场。作者举了个例子，在一个图书馆，一个人要开窗户，一个要关窗户。这是立场冲突。图书馆管理员来询问以后，了解到开窗户的人是想要呼吸新鲜空气，而关窗户的人是怕穿堂风。于是管理员把隔壁的窗户打开了，这样既能呼吸新鲜空气，又避免了穿堂风。两个人的利益是不冲突的，这时纠结在立场上是不明智的。</p>
-<h5 id="把人和事分开"><a href="#把人和事分开" class="headerlink" title="把人和事分开"></a>把人和事分开</h5><p>每个人都渴望别人的尊重，在谈判中也是如此。即使谈判很艰难，也要表示对别人的尊重，注意维护和对方良好的关系。</p>
-<h5 id="关注对方的想法"><a href="#关注对方的想法" class="headerlink" title="关注对方的想法"></a>关注对方的想法</h5><p>有些你认为不重要的事情，对方可能认为很重要，所以要关注对方的想法。对我们来说可能是举手之劳的事情，对对方可能很重要。</p>
-<h5 id="为共同利益创造方案"><a href="#为共同利益创造方案" class="headerlink" title="为共同利益创造方案"></a>为共同利益创造方案</h5><p>有时候我们发现双方利益是冲突的，这时候要想想能否把蛋糕做大一点，这样双方都能得到足够的利益。</p>
-<p>作为一名谈判者，你应尽量找到让对方满意的解决方案。如果顾客感觉在买卖中受骗，那么店老板实际上也失败了。他会失去一位顾客，名声也会受损。</p>
-<p>在大多数情况下，问一位谈判者“谁赢了”就好比问谁赢得了婚姻一样不合适。</p>
-<h5 id="确定对方的权限"><a href="#确定对方的权限" class="headerlink" title="确定对方的权限"></a>确定对方的权限</h5><p>在做出决定前，询问对方，他有多大的权限做决定。英国的脱欧谈判就挺有意思，欧盟和英国谈判结束了，谈判的结果还要英国议会通过，感觉这个很扯。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/03/02/%E8%AF%BB%E8%B0%88%E5%88%A4%E5%8A%9B/" data-id="cllk8q4ni000rijop2yzt09w0" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-读人生的智慧" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" class="article-date">
-  <time datetime="2019-01-29T15:13:07.000Z" itemprop="datePublished">2019-01-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/">读人生的智慧</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>1月的第二本书”谈判力“跳票了 ，并没有读这本书，只好作为2月的第一本书了。</p>
-<p>这里摘抄一些”人生的智慧“这本书的内容。</p>
-<p>每个人到底生活于何样的世界，首先取决于这个人对这个世界的理解。这个世界因为个人头脑和精神的差异而相应不同。因此，每个人的世界是贫瘠的、浅薄的和肤浅的，抑或丰富多彩的、趣味盎然和充满意义的，这视个人的头脑而定。例如，不少人羡慕他人在生活中发现和遇到饶有趣味的事情，其实前者应该羡慕后者所具有的理解事物的禀赋才对。因为正是归因于他们理解事物的禀赋，他们所经历过的事情，在其描绘中都带有某种韵味。这是因为在一个思想丰富的人看来是意味深长的事情，对于一个肤浅、头脑庸俗的人来说，却不过是平凡世界里面的乏味一幕而已。</p>
-<p>对于人的幸福快乐而言，主体远远比客体来得重要，任何一切都可以证实这一点。例子包括：饥饿才是最好的调味品，衰老之人对青春美色再难一见钟情。</p>
-<p>对生活稍作考察就可以知道：痛苦和无聊是人类幸福的两个死敌。</p>
-<p>因此，我们看见低下的劳动阶层与匮乏，亦即痛苦，进行着永恒的斗争，而有钱的上流社会却旷日持久地与无聊进行一场堪称绝望的搏斗。</p>
-<p>一个人对痛苦的感受能力和对无聊的感受能力成反比，这是由一个人的精神能力的大小所决定的。</p>
-<p>因为人们彼此之间并没有可以交换的思想，所以，他们就交换纸牌，并试图赢取对方的金钱。</p>
-<p>明智的人在取暖的时候懂得与火保持一段距离，而不会像傻瓜那样太过靠近火堆。</p>
-<p>最重要的是我们不应让大脑进行一切强迫性的、持续不停顿的和不合时宜的劳作。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/29/%E8%AF%BB%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/" data-id="cllk8q4nf000mijop07a63dfy" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-读Drive" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/01/17/%E8%AF%BBDrive/" class="article-date">
-  <time datetime="2019-01-17T15:12:25.000Z" itemprop="datePublished">2019-01-17</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/01/17/%E8%AF%BBDrive/">读Drive</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>年初给自己订了个计划，一个月读两本书，第一本选的是Drive，作者是Daniel H.Pink。</p>
-<p>现在是1月17号，我依然没有读完这本书。部分原因是没有花时间读，部分原因是这是本英文书，读起来比较费劲。</p>
-<p>看着半个月即将过去，不仅心里着急，于是读书的时候力求读的快，囫囵吞枣，反而读不进去。</p>
-<p>于是想，读不完就读不完吧，这一本读了多少算多少，我还是继续开始读下一本。</p>
-<p>这篇文章是读“Drive”的笔记。</p>
-<p>管理者经常碰到的一个问题是如何激励员工，最传统的办法是萝卜加大棒。萝卜的例子有升职、加薪、表扬。大棒的例子有开除，降薪，批评。通过正向的激励和反向的激励来刺激员工达成目标。这个方法实施起来简单，而且效果不错，大家在生活中能经常看到。</p>
-<p>这本书提出，有时候萝卜加大棒是不合适的，会带来不好的结果，它的总结是:</p>
-<ol>
-<li>会耗尽耗尽内部驱动力。人们是为了奖励来做事情，而不是真心想做。</li>
-<li>不能提高效率。奖励超过了一定限度，对提高效率没什么帮助。</li>
-<li>会阻止创造性。</li>
-<li>会排挤好的行为。比如付钱给献血的人，反而会导致献血量下降，因为排挤了志愿献血的人。</li>
-<li>会鼓励作弊，走捷径和不道德的行为。</li>
-<li>会对获得奖励上瘾。</li>
-<li>短视，只看到短期激励带来的利益。</li>
-</ol>
-<p>那么什么时候萝卜和大棒比较适合呢，作者给出的答案是，那些“需要重复”的工作。如果一份工作是需要根据一份文档，按照步骤进行，无聊，但是要确保不犯错误，并且重复进行，那么这样的工作比较适合萝卜和大棒。这让我想起了工厂里的安全生产奖，对于工厂日复一日的生产活动，激励大家保证安全是非常重要的。</p>
-<p>作者定义了两种驱动，一是外部驱动，比如金钱，物质奖励。二是内部驱动，比如自主性，精通，使命感。对于重复的工作，外部驱动更适合。而对于那些需要创造力的工作，内部驱动更适合。</p>
-<p>下面分别来讲自主性，精通和使命感。</p>
-<p>如果人们感觉自己可以决定要做的事，那么效率会更高。Google会给员工20%时间来做自己认为对公司重要的事情，很多重要的产品是在这20%的时间内获得灵感的，比如说Google News，Gmail。当然Goolge也没有把100%的时间给员工做自己想做的事情，说明自主性的效果还是有一定局限的。</p>
-<p>精通或者说追求卓越是另一个重要的内部激励。在一个领域追求卓越，精通这个领域，能够激励人不断学习。在学校里，尤其是高中学的很多知识，高考完就忘了，部分原因是，你并不是为了学这门课程而是为了通过考试。如果你的兴趣就是化学，相信你高考以后仍然会记得那些化学公式。</p>
-<p>使命感。又到年底，公司年会上，创始人一定会再次讲一遍公司的愿景，捎带一些鸡汤。为什么要讲这些？因为使命感是更为长远的目标，我们不能只盯着眼前的利益。什么是使命感？为中华崛起而努力，面对内忧外患，挺身而出，舍我其谁，这就是使命感。站在技术的最前沿，做出改变世界的产品，这也是使命感。</p>
-<p>对于需要创造性的工作，我们需要赋予员工自主性，鼓励他们在工作领域追求卓越，并且要有使命感。</p>
-<p>下一本书“谈判力”</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2019/01/17/%E8%AF%BBDrive/" data-id="cllk8q4nd000jijop3g9i1jb2" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-读曾国藩传" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" class="article-date">
-  <time datetime="2016-11-24T15:09:43.000Z" itemprop="datePublished">2016-11-24</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/">读曾国藩传</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近读了萧一山著的“曾国藩传”，有些心得，记录一下。</p>
-<p>曾国藩是晚清重臣，创建湘军灭掉太平天国。湘军全胜时期，南方各省的总督基本上全是湘军将领，甚至有人劝曾国藩推翻清朝，自己称帝。他的文章思想也流传后世，影响了无数人。毛泽东和蒋介石都很推崇曾国藩。</p>
-<p>书中有一段对曾国藩的评价很精彩，“有宗教家之信仰，而无其迷妄；有道德家之笃实，而无其迂腐；有艺术家之文采，而无其浮华；有哲学家之深思，而无其凿空；有科学家之条理，而无其支离；有政治家之手腕，而无其权诈；有军事家之韬略，而无其残忍。”。</p>
-<h5 id="经世致用"><a href="#经世致用" class="headerlink" title="经世致用"></a>经世致用</h5><p>清朝的读书人除了学习八股文、考科举之外，主要在做两件事，一是考据，二是义理。考据就是翻遍古书，尝试把儒家典籍的每个字搞清楚是什么意思。义理则是研究宋明理学，类似于哲学。</p>
-<p>无论是考据还是义理，都对国家兴亡没有直接的作用，大量人才把精力花在这些事情上实在太浪费资源了。曾国藩生活在清朝末期，鸦片战争已经结束，面对内忧外患，他觉得读书人应该致力于经世致用的学问。他也写诗，也写文章，也思考义理，也读考据的书，但是他并不专研任何一种。</p>
-<p>学习知识一定要着眼于应用，否则就落于虚浮。</p>
-<h5 id="严于律己"><a href="#严于律己" class="headerlink" title="严于律己"></a>严于律己</h5><p>我们常常对他人苛责而对自己宽容。最近看了一部电影叫“完美陌生人”，剧中一对夫妻都和他人有暧昧，但是在发现对方的暧昧秘密时，无不义正辞严，而当对方发现自己的秘密时又为自己百般辩解。</p>
-<p>曾国藩对自己有很高的要求，不贪钱，不贪权，读书做事勤快，孝敬父母，而对他人则比较宽容。曾国藩有记日记的习惯，每天在日记中都反省自己的行为，严格要求自己。</p>
-<h5 id="持之以恒"><a href="#持之以恒" class="headerlink" title="持之以恒"></a>持之以恒</h5><p>自己年纪已经不小，回顾自己的学习、工作，不禁感叹，正是因为不能持之以恒，以至于现在毫无建树。</p>
-<p>曾国藩在30几岁的时候开始写日记，此后无论多忙，都坚持写。他在写给弟弟、子侄的家书中也总是强调，无论读书还是写字，一定要持之以恒。</p>
-<h5 id="读书明理"><a href="#读书明理" class="headerlink" title="读书明理"></a>读书明理</h5><p>小时候，老人常常说，小孩子读过书了应该明事理。事实上，学校里和“明事理”关系最近的估计就是“思想教育”课了，而这门课估计是大家最讨厌的课程。这造成了很多学生学习成绩很好，掌握了很多科学知识，但是却不会与人相处，结果在社会上处处碰壁。</p>
-<p>古人读“四书五经”，重在读书明理，通过学习来塑造学生的人生观和价值观，这是现代学校教育缺失的。所以现在社会上出现了国学热，这也算是一种拨乱反正吧。</p>
-<h5 id="与有才之人分担工作"><a href="#与有才之人分担工作" class="headerlink" title="与有才之人分担工作"></a>与有才之人分担工作</h5><p>曾国藩认识到，一人的力量毕竟有限，为了成就大事业，必须要其他有才的人一起努力，所以他努力寻找、推荐人才，即使是和自己有冲突的人也照样推荐担任重要职位。</p>
-<p>晚清湖南还有一位重臣叫左宗棠，他对平定太平天国也很重要，不过他和曾国藩却总是不对付。曾国藩并没有因此而排挤左宗棠，在国家大事上，曾国藩总是鼎力相助。曾国藩去世以后，左宗棠的挽联是“知人之明，谋国之忠，自愧不如元辅；攻金以砺，错玉以石，相期无负平生；”，可见左对曾的评价。</p>
-<h5 id="个人修养"><a href="#个人修养" class="headerlink" title="个人修养"></a>个人修养</h5><p>修身齐家治国平天下。曾国藩非常注重个人修养。</p>
-<p>曾国藩年轻的时候给自己定下了一个每天完成的功课，一共有十二项：“敬；静坐；早起；读书不二；读史；谨言；养气；保身；日知所亡；月无忘其所能；作字；夜不出门；”。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://blog.suyuan.me/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/" data-id="cllk8q4nh000qijopho86gwv9" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
+    <div class="articleListItem"><a href="/2016/11/24/%E8%AF%BB%E6%9B%BE%E5%9B%BD%E8%97%A9%E4%BC%A0/">读曾国藩传</a><span class="articleDate">2016-11-24</span></div>
   
 
 
   <nav id="page-nav">
-    
-    <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next &amp;raquo;</a>
+    <a class="extend prev" rel="prev" href="/">Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next</a>
   </nav>
 
 </section>
         
-          <aside id="sidebar">
+      </div>
+      <footer id="footer">
+  
+    <aside id="sidebar" class="outer">
   
     
 
@@ -639,15 +85,6 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%95/" style="font-size: 10px;">浏览记录</a>
-    </div>
-  </div>
-
-  
-    
-  <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">August 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
@@ -656,45 +93,11 @@
 
 
   
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2023/08/21/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-21/">浏览记录2023-08-21</a>
-          </li>
-        
-          <li>
-            <a href="/2023/08/20/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-20/">浏览记录2023-08-20</a>
-          </li>
-        
-          <li>
-            <a href="/2023/08/17/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-17/">浏览记录2023-08-17</a>
-          </li>
-        
-          <li>
-            <a href="/2023/08/15/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%95-2023-08-15/">浏览记录-2023-08-15</a>
-          </li>
-        
-          <li>
-            <a href="/2023/08/12/%E6%B5%8F%E8%A7%88%E8%AE%B0%E5%BD%952023-08-12/">浏览记录2023-08-12</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
 </aside>
-        
-      </div>
-      <footer id="footer">
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2023 Su Yuan<br>
+      &copy; 2024 Su Yuan<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
